@@ -1,0 +1,17 @@
+# This file is a template, and might need editing before it works on your project.
+# Official framework image. Look for the different tagged releases at:
+# https://hub.docker.com/r/library/node/tags/
+image: node:latest
+
+services:
+  - redis:latest
+
+cache:
+  paths:
+  - node_modules/
+
+test_main:
+  script:
+   - git clone https://gitlab-ci-token:$CI_BUILD_TOKEN@openlab.ncl.ac.uk/gitlab/connected-academy/spec.git
+   - npm install
+   - npm test

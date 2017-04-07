@@ -1,0 +1,25 @@
+{
+    "tokens":
+    [
+        {
+            "name":"course",
+            "regex":"https:\/\/(.*)\\.connectedacademy\\.io\/.*"     
+        },
+        {
+            "name":"class",
+            "regex":"https:\/\/.*\\.connectedacademy\\.io\/#\/(.*)\/.*"            
+        },
+        {
+            "name":"segment",
+            "regex":"https:\/\/.*\\.connectedacademy\\.io\/#\/.*\/(.*)"          
+        },
+        {
+            "name":"like",
+            "regex":"https:\/\/.*\\.connectedacademy\\.io\/content\/(.*)"          
+        },
+        {
+            "name":"hub",
+            "regex":"#ca-(.*)"
+        }
+    ]
+}
