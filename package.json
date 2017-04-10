@@ -26,10 +26,11 @@
     "chai":"3.5.0",
     "raml-1-parser": "1.1.19",
     "raml-js-validator": "0.5.1",
-    "flat": "2.0.1"
+    "flat": "2.0.1",
+    "istanbul": "0.4.5"
   },
   "scripts": {
-    "test": "mocha --harmony-async-await test/bootstrap.test.js test/**/*.test.js",
+    "test": "./node_modules/.bin/istanbul cover mocha --harmony-async-await test/bootstrap.test.js test/**/*.test.js",
     "start":"node --harmony-async-await app.js"
   },
   "repository": {
