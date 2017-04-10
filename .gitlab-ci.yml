@@ -13,7 +13,7 @@ variables:
   PRE_SHARED_KEY: testpsk
   ORIENTDB_DB: testdb
   ORIENTDB_USERNAME: root
-  ORIENT_HOST: orientdb
+  ORIENTDB_HOST: orientdb
 
 cache:
   paths:
