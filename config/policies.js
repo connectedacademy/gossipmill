@@ -1,4 +1,3 @@
-var passport = require('passport');
 module.exports.policies = {
     '*':['psk','jsononly','cors'],
     'message':{
