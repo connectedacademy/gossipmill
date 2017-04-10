@@ -46,7 +46,17 @@ before(function(done) {
     {
       host: 'redis',
       port: 6379
-    }
+    },
+    connections:
+    {
+      orient: {
+        adapter: 'sails-orientdb',
+        host: 'orientdb',
+        user: 'root',
+        password: process.env.ORIENTDB_ROOT_PASSWORD,
+        database: 'test'
+      }
+    },
   }, function(err) {
     if (err) return done(err);
     // here you can load fixtures, etc.
