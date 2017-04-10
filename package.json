@@ -30,7 +30,7 @@
     "istanbul": "0.4.5"
   },
   "scripts": {
-    "test": "./node_modules/.bin/istanbul cover mocha --harmony-async-await test/bootstrap.test.js test/**/*.test.js",
+    "test": "./node_modules/.bin/istanbul cover mocha -- --harmony-async-await test/bootstrap.test.js test/**/*.test.js",
     "start":"node --harmony-async-await app.js"
   },
   "repository": {

@@ -7,6 +7,14 @@ services:
   - redis:latest
   - orientdb:latest
 
+variables:
+  ORIENTDB_ROOT_PASSWORD: testpassword
+  ORIENTDB_PASSWORD: testpassword
+  PRE_SHARED_KEY: testpsk
+  ORIENTDB_DB: testdb
+  ORIENTDB_USERNAME: root
+  ORIENT_HOST: orientdb
+
 cache:
   paths:
   - node_modules/
