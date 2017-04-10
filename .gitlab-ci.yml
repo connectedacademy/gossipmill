@@ -5,6 +5,7 @@ image: node:latest
 
 services:
   - redis:latest
+  - orientdb:latest
 
 cache:
   paths:
