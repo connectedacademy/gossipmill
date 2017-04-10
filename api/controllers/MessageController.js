@@ -39,19 +39,22 @@ module.exports = {
 
         //when new messages come in, needs to run the subscribe filter and send to the right people
 
-
+        return res.end();
     },
 
     list: async (req,res) => {
         //TODO: implement proper query
+        return res.end();
        
     },
 
     totals: (req, res)=>{
+        return res.end();
 
     },
 
     visualisation: (req,res)=>{
+        return res.end();
 
     }
 }

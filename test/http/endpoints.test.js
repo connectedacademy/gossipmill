@@ -1,74 +1,145 @@
 var request = require('supertest');
 var expect = require('chai').expect;
 
-// var _ = require('lodash');
-var flat = require('flat');
-var _ = require('lodash');
-
-var deepTypeMatch = function(expected, actual)
-{
-  //map types:
-  var flatted = flat(expected);
-  // console.log(flatted);
-  var mapped = _.forOwn(flatted,(v,k)=>{
-    return typeof(flatted[k])
-  })
-  console.log(mapped);
-  // throw JSON.stringify(expectedtypes);
-  //deep compare:
-};
-
- deepTypeMatch({
-    msg:'string msg',
-    second:{
-      third:'asdasdas'}
-  },
-  {
-    msg:345
-  });
-
-describe('Auth', function() {
-  
-  describe('user login', function() {
-    it('should redirect to Twitter', function (done) {
+describe('Status', () => {
+    it('should return info', function (done) {
       request(sails.hooks.http.app)
-        .get('/auth/login')
-        .expect(302,done);
+        .get('/')
+        .set('Accept', 'application/json')
+        .expect(200)
+        .expect('Content-Type', /json/)
+        .expect((res)=> {
+            bodyCheck(res.body,'status')
+        })
+        .end(done);
     });
-  });
+});
 
-  describe('admin login', function() {
-    it('should redirect to GitHub', function (done) {
+describe('Tokens', () => {
+
+    it ('should only allow valid psk',(done)=>{
       request(sails.hooks.http.app)
-        .get('/admin/login')
-        .expect(302,done);
+        .get('/tokens')
+        .expect((res)=> {
+            bodyCheck(res.body,{
+                msg:'name',
+                data:'regex'
+            });
+        })
+        .expect(403,done);
     });
-  });
 
-  describe('user logout', function() {
-    it('should return message', function () {
-      return request(sails.hooks.http.app)
-        .get('/auth/logout')
+    it('should return valid token list', function (done) {
+      request(sails.hooks.http.app)
+        .get('/tokens')
+        .query({ psk: process.env.PRE_SHARED_KEY })        
+        .set('Accept', 'application/json')
         .expect(200)
-        .then(response => {
-          expect(response.body).to.have.property('msg');
-        });
+        .expect('Content-Type', /json/)
+        .expect((res)=> {
+          _.each (res.body.tokens,(d)=>{
+              bodyCheck(d,{
+                  name:'name',
+                  regex:'regex'
+              });
+          });
+        })
+        .end(done);
     });
-  });
+});
 
-  describe('admin logout', function() {
-    it('should return message', function () {
-      return request(sails.hooks.http.app)
-        .get('/admin/logout')
+describe('Services', () => {
+
+    it ('should only allow valid psk',(done)=>{
+      request(sails.hooks.http.app)
+        .get('/services')
+        .expect((res)=> {
+            bodyCheck(res.body,{
+                msg:'name',
+                data:'regex'
+            });
+        })
+        .expect(403,done);
+    });
+
+    it('should return valid service list', function (done) {
+      request(sails.hooks.http.app)
+        .get('/services')
+        .query({ psk: process.env.PRE_SHARED_KEY })
+        .set('Accept', 'application/json')
         .expect(200)
-        .then(response => {
-          deepTypeMatch({
-            msg:'string msg'
-          },
-          response.body);
+        .expect('Content-Type', /json/)
+        .expect((res)=> {
+          _.each (res.body.tokens,(d)=>{
+              bodyCheck(d,{
+                  name:'name',
+                  tag:'regex'
+              });
+          });
+        })
+        .end(done);
+    });
+});
 
-          // expect(response.body).to.have.property('msg');
-        });
+describe('Messages', () => {
+
+  describe('Subscribe', () =>{
+    it ('should only allow valid psk',(done)=>{
+      request(sails.hooks.http.app)
+        .post('/messages/subscribe/0/0')
+        .expect((res)=> {
+            bodyCheck(res.body,{
+                msg:'name',
+                data:'regex'
+            });
+        })
+        .expect(403,done);
     });
   });
+
+
+  describe('List', () =>{
+
+    it ('should only allow valid psk',(done)=>{
+      request(sails.hooks.http.app)
+        .post('/messages/list/0/0')
+        .expect((res)=> {
+            bodyCheck(res.body,{
+                msg:'name',
+                data:'regex'
+            });
+        })
+        .expect(403,done);
+    });
+
+  });  
+
+  describe('Totals', () =>{
+    it ('should only allow valid psk',(done)=>{
+      request(sails.hooks.http.app)
+        .post('/messages/totals')
+        .expect((res)=> {
+            bodyCheck(res.body,{
+                msg:'name',
+                data:'regex'
+            });
+        })
+        .expect(403,done);
+    });
+  });
+
+  describe('Visualisation', () =>{
+    it ('should only allow valid psk',(done)=>{
+      request(sails.hooks.http.app)
+        .post('/messages/visualisation')
+        .expect((res)=> {
+            bodyCheck(res.body,{
+                msg:'name',
+                data:'regex'
+            });
+        })
+        .expect(403,done);
+    });
+  });
+
 });
