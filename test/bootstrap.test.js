@@ -46,6 +46,9 @@ before(function(done) {
     {
       host: 'redis',
       port: 6379
+    },
+    models: {
+      migrate: 'create'
     }
   }, function(err) {
     if (err) return done(err);
