@@ -28,8 +28,8 @@ module.exports.routes = {
   'GET /services':'MessageController.services',
 
   'POST /messages/create':'MessageController.create',
-  'POST /messages/subscribe/:service/:userid':'MessageController.subscribe',
-  'POST /messages/list/:service/:userid':'MessageController.list',
+  'POST /messages/subscribe/:service/:user':'MessageController.subscribe',
+  'POST /messages/list/:service/:user':'MessageController.list',
   'POST /messages/totals':'MessageController.totals',
   'POST /messages/visualisation':'MessageController.visualisation'
 };

@@ -43,7 +43,7 @@ var processMessage = async function(model, operation, message)
 
     //build relationship with rule:
     _.each(sails.tokens,(token)=>{
-
+        
     });
 
     //process for each subscriber:

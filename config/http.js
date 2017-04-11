@@ -13,7 +13,22 @@ module.exports.http = {
 
   middleware: {
 
-    validator: require('express-validator')(),
+    validator: require('express-validator')({
+      customValidators: {
+        isArray: function(value) {
+            return Array.isArray(value);
+        },
+        isFilter: function(value)
+        {
+          for (let f of value)
+          {
+            if (!f.name || !f.query)
+              return false;
+          }
+          return true;
+        }
+      }
+    }),
 
     order: [
       'startRequestTimer',

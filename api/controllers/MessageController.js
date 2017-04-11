@@ -1,8 +1,26 @@
 let pjson = require('../../package.json');
 let os = require('os');
 
+
+let filter_schema = {
+    'filter_by':{
+        notEmpty: true,
+        isArray: true,
+        isFilter: true
+    }
+};
+
+let group_schema = {
+    'group_by.name':{
+        notEmpty: true
+    }
+};
+
 module.exports = {
     
+    /**
+     * Done
+     */
     root: (req,res) =>{
         return res.json({
             msg:'Gossipmill Running',
@@ -12,17 +30,23 @@ module.exports = {
         })
     },
 
+    /**
+     * Done
+     */
     tokens: (req,res)=>{
         return res.json(sails.tokens);
     },
 
+    /**
+     * Done
+     */
     services: async (req,res)=>{
         try
         {
-            let results = await Message.query("SELECT DISTINCT(service) FROM message;");
+            let results = await Message.query("SELECT DISTINCT(service) FROM message LIMIT 20;");
             let normalised = _.map(results,(r)=>{
                 return {
-                    name: r.DISTINCT,
+                    name:_.capitalize(r.DISTINCT),
                     tag: r.DISTINCT
                 }
             });
@@ -35,6 +59,22 @@ module.exports = {
     },
 
     subscribe: async (req,res)=>{
+
+        req.checkBody(filter_schema);
+        req.checkBody('limit').isInt();
+        req.checkParams('service').notEmpty();
+        req.checkParams('user').notEmpty();
+
+        try
+        {
+            let result = await req.getValidationResult();
+            result.throw();
+        }
+        catch (e)
+        {
+            return res.badRequest(e.mapped());
+        }
+
         //initiate subscribe
 
         //when new messages come in, needs to run the subscribe filter and send to the right people
@@ -42,19 +82,20 @@ module.exports = {
         let user_service = req.param('service'); //i.e. twitter
         let user_account = req.param('user');// i.e. @tombartindale
 
-        sails.log.verbose('Subscribe to messages with ' + req.params())
+        sails.log.verbose('Subscribe to messages')
 
-        let limit = req.query.limit || process.env.DEFAULT_LIMIT;
+        let params = req.body;
 
-        let params = {
-            limit: limit,
-            query: req.body
-        }
+        params.account = user_account;
+        params.service = user_service;
 
         try
         {
-            let messages = await SubscriptionManager.subscribe(params);
-            return res.ok('Subscription Updated');
+            let messages = await SubscriptionManager.subscribe(req, params);
+            return res.json({
+                scope: params,
+                msg: 'Subscription Updated'
+            });
         }
         catch (e)
         {
@@ -65,28 +106,44 @@ module.exports = {
     },
 
     list: async (req,res) => {
-        //TODO: implement proper query
+
+        req.checkBody(filter_schema);
+        req.checkBody('limit').isInt();
+        req.checkParams('service').notEmpty();
+        req.checkParams('user').notEmpty();
+
+        try
+        {
+            let result = await req.getValidationResult();
+            result.throw();
+        }
+        catch (e)
+        {
+            return res.badRequest(e.mapped());
+        }
 
         let user_service = req.param('service'); //i.e. twitter
         let user_account = req.param('user');// i.e. @tombartindale
 
-        sails.log.verbose('Query messages with ' + req.params())
+        sails.log.verbose('Query messages with ' + JSON.stringify(req.body));
 
         let limit = req.query.limit || process.env.DEFAULT_LIMIT;
 
         let params = {
             limit: limit,
-            query: req.body
+            query: req.body.filter_by
         }
+
+        params.account = user_account;
+        params.service = user_service;
 
         try
         {
-            let messages = await SubscriptionManager.query(params);
+            let messages = await Message.heuristicQuery(params);
             return res.json({
-                scope:{
-                    query,
+                scope: _.merge(params,{
                     length: messages.length
-                },
+                }),
                 data: messages
             });
         }
@@ -97,16 +154,66 @@ module.exports = {
        
     },
 
-    totals: (req, res)=>{
-        return res.end();
+    totals: async (req, res)=>{
 
+        req.checkBody(filter_schema);
+
+        try
+        {
+            let result = await req.getValidationResult();
+            result.throw();
+        }
+        catch (e)
+        {
+            return res.badRequest(e.mapped());
+        }
+
+        let query = req.body.filter_by;
+        
+        try
+        {
+           sails.log.verbose('Total for ' + JSON.stringify(query));
+           let data = await Message.heuristicTotal(query);
+           return res.json(data);
+        }
+        catch (e)
+        {
+            return res.serverError(e);
+        }
     },
 
-    visualisation: (req,res)=>{
-        return res.end();
+    visualisation: async (req,res)=>{
 
+        req.checkBody(group_schema);
+        req.checkBody(filter_schema);
+
+        try
+        {
+            let result = await req.getValidationResult();
+            result.throw();
+        }
+        catch (e)
+        {
+            return res.badRequest(e.mapped());
+        }
+
+        let query = req.body;
+        
+        try
+        {
+           sails.log.verbose('Visualisation grouped by ' + query.group_by.name + " filtered by " + JSON.stringify(query.filter_by));
+           let data = await Message.heuristicGroup(query);
+           return res.json(data);
+        }
+        catch (e)
+        {
+            return res.serverError(e);
+        }
     },
 
+    /**
+     * Done
+     */
     create: async (req,res)=>{
 
         req.checkBody('credentials.service').notEmpty();
@@ -130,7 +237,7 @@ module.exports = {
         try {
 
             let service = req.body.credentials.service;
-            let credentials = req.body.credentials; /*  consumer_key: credentials.key,consumer_secret: credentials.secret,access_token_key: credentials.token_key,access_token_secret: credentials.token_secret */
+            let credentials = req.body.credentials;
 
             let msg = {
                 text: req.body.text
