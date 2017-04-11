@@ -30,7 +30,10 @@ module.exports.connections = {
     port: process.env.ORIENTDB_PORT,
     user: process.env.ORIENTDB_USERNAME,
     password: process.env.ORIENTDB_PASSWORD,
-    database: process.env.ORIENTDB_DB
+    database: process.env.ORIENTDB_DB,
+    options:{
+      useToken: true
+    }
   },
   'sails-disk':
   {

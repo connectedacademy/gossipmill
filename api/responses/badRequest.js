@@ -22,8 +22,11 @@ module.exports = function badRequest(data) {
   var res = this.res;
   var sails = req._sails;
 
-  sails.log.verbose('Sending 400 ("Bad Request") response: \n',data);
+  sails.log.verbose('Sending 400 ("Bad Request") response: ',data);
 
-  return res.status(400).jsonx(data);
+  return res.status(400).json({
+    msg:'Bad Request',
+    data: data
+  });
 };
 

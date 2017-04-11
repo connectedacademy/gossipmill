@@ -1,6 +1,3 @@
-
-
-
 module.exports = function(sails)
 {
     return {
@@ -11,6 +8,9 @@ module.exports = function(sails)
             sails.log.verbose('Messaging Tokens Loaded'); 
 
             sails.on('hook:orm:loaded', function() {
+
+                return cb();
+
 
                 Message.getDB().liveQuery('LIVE SELECT FROM message')
                 .on('live-update',async function(data){
@@ -29,7 +29,6 @@ module.exports = function(sails)
                 
 
 
-                return cb();
 
             });
         }
@@ -39,7 +38,16 @@ module.exports = function(sails)
 var processMessage = async function(model, operation, message)
 {
     //for each rule in settings
-    sails.log.verbose("Process Message",operation,message);
-    //for each 
+    sails.log.verbose("Process Message",operation,message.id);
+    //for each rule:
+
+    //build relationship with rule:
+    _.each(sails.tokens,(token)=>{
+
+    });
+
+    //process for each subscriber:
+    await SubscriptionManager.processNewMessageForSubscribers(message);
+
     return;
 }

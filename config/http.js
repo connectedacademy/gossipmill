@@ -13,12 +13,14 @@ module.exports.http = {
 
   middleware: {
 
+    validator: require('express-validator')(),
 
     order: [
       'startRequestTimer',
       'cookieParser',
       'session',
       'bodyParser',
+      'validator',
       'myRequestLogger',
       'handleBodyParserError',
       'compress',
