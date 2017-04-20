@@ -43,6 +43,7 @@ module.exports = {
     services: async (req,res)=>{
         try
         {
+            sails.log.verbose('List services')        
             let results = await Message.query("SELECT DISTINCT(service) FROM message LIMIT 20;");
             let normalised = _.map(results,(r)=>{
                 return {
@@ -107,8 +108,9 @@ module.exports = {
 
     list: async (req,res) => {
 
-        req.checkBody(filter_schema);
         req.checkBody('limit').isInt();
+        req.checkBody(filter_schema);
+        console.log("DOING LIST");
         req.checkParams('service').notEmpty();
         req.checkParams('user').notEmpty();
 
@@ -121,11 +123,11 @@ module.exports = {
         {
             return res.badRequest(e.mapped());
         }
+        
 
         let user_service = req.param('service'); //i.e. twitter
         let user_account = req.param('user');// i.e. @tombartindale
 
-        sails.log.verbose('Query messages with ' + JSON.stringify(req.body));
 
         let limit = req.query.limit || process.env.DEFAULT_LIMIT;
 
@@ -137,9 +139,12 @@ module.exports = {
         params.account = user_account;
         params.service = user_service;
 
+        sails.log.verbose('Query messages', params);
+
         try
         {
             let messages = await Message.heuristicQuery(params);
+            console.log(messages);
             return res.json({
                 scope: _.merge(params,{
                     length: messages.length
@@ -172,7 +177,7 @@ module.exports = {
         
         try
         {
-           sails.log.verbose('Total for ' + JSON.stringify(query));
+           sails.log.verbose('Total', query);
            let data = await Message.heuristicTotal(query);
            return res.json(data);
         }
@@ -201,7 +206,7 @@ module.exports = {
         
         try
         {
-           sails.log.verbose('Visualisation grouped by ' + query.group_by.name + " filtered by " + JSON.stringify(query.filter_by));
+           sails.log.verbose('Visualisation', query.group_by.name, query.filter_by);
            let data = await Message.heuristicGroup(query);
            return res.json(data);
         }

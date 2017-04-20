@@ -20,12 +20,19 @@ module.exports.http = {
         },
         isFilter: function(value)
         {
-          for (let f of value)
+          if (value)
           {
-            if (!f.name || !f.query)
-              return false;
+            for (let f of value)
+            {
+              if (!f.name || !f.query)
+                return false;
+            }
+            return true;
           }
-          return true;
+          else
+          {
+            return false;
+          }
         }
       }
     }),

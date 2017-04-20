@@ -2,8 +2,12 @@
     "tokens":
     [
         {
+            "name":"course_hashtag",
+            "regex":"(#ca2017)"     
+        },
+        {
             "name":"course",
-            "regex":"https:\/\/(.*)\\.connectedacademy\\.io\/.*"     
+            "regex":"https:\/\/(.*)\\.connectedacademy\\.io\\.*"     
         },
         {
             "name":"class",
