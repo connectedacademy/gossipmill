@@ -227,6 +227,8 @@ module.exports = {
         req.checkBody('credentials.token').notEmpty();
         req.checkBody('credentials.tokenSecret').notEmpty();
         req.checkBody('text').notEmpty().isLength({min:2,max:140});
+        req.checkBody('replyto').optional().notEmpty();
+        req.checkBody('remessageof').optional().notEmpty();
 
         try
         {
@@ -250,12 +252,12 @@ module.exports = {
 
             if (service == 'twitter')
             {
-                sails.log.verbose('Creating message: ' + req.text);
+                sails.log.verbose('Creating message',msg);
                 
                 let newmessage = await Twitter.newmessage(credentials, msg);
 
                 Message.create(newmessage).exec((err, message)=>{
-                    return res.ok('Message Sent');
+                    return res.json(message);
                 });
             }
             else

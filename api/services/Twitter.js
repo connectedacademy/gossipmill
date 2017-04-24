@@ -31,7 +31,7 @@ module.exports = {
         newmessage.service = 'twitter';
         newmessage.createdAt = new Date(response.created_at);
         newmessage.entities = response.entities;
-        newmessage.user = 'twitter_'+response.user.id;
+        newmessage.user = response.user.id;
         newmessage.lang = response.lang;
         newmessage.replyto = response.in_reply_to_status_id;
         return newmessage;

@@ -1,7 +1,11 @@
+let fs = require('fs-promise');
+
 module.exports = function(sails)
 {
     return {
         initialize:(cb)=>{
+
+
 
             let settings = require('../../../config/settings.json');
             sails.tokens = settings.tokens;
@@ -9,39 +13,39 @@ module.exports = function(sails)
 
             sails.on('hook:orm:loaded', async function() {
 
-                let testmessage = {
-                    text: 'This is a test message #ca2017 https://testclass.connectedacademy.io',
-                    service:'twitter',
-                    user:'17308978',
-                    replyto: '850375278257987585',
-                    entities:{
+                // let testmessage = {
+                //     text: 'This is a test message #ca2017 https://testclass.connectedacademy.io',
+                //     service:'twitter',
+                //     user:'17308978',
+                //     replyto: '850375278257987585',
+                //     entities:{
 
-                    }
-                }
-
+                //     }
+                // }
                 
-                Message.create(testmessage).exec(async (err,real)=>{
+                // Message.create(testmessage).exec(async (err,real)=>{
 
-                    let success = await processMessage('INSERT', real);
+                //     let success = await processMessage('INSERT', real);
 
-                    return cb();
-                })
-                
-
-                // Message.getDB().liveQuery('LIVE SELECT FROM message')
-                // .on('live-update',async function(data){
-                //     await processMessage(Message,'UPDATE', data.content);
+                //     return cb();
                 // })
-                // .on('live-insert',async function(data){
-                //     await processMessage(Message,'INSERT', data.content);
-                // })
-                // .on('live-delete',async function(data){
-                //     await processMessage(Message,'DELETE', data.content);
-                // });
 
-                
                 //TODO: batch update existing messages in the db (in case the relationships have changed)
+                
 
+                Message.getDB().liveQuery('LIVE SELECT FROM message')
+                .on('live-update',async function(data){
+                    await processMessage('UPDATE', data.content);
+                })
+                .on('live-insert',async function(data){
+                    await processMessage('INSERT', data.content);
+                })
+                .on('live-delete',async function(data){
+                    await processMessage('DELETE', data.content);
+                });
+
+                
+                cb();
             });
         }
     }
@@ -88,7 +92,7 @@ var buildReMessageLink = async function(message)
 {
     //find author record:
     let msg = await Message.findOne({ message_id: message.replyto, service: message.service });
-    console.log(msg);
+    // console.log(msg);
     //if there is an author record, then link
     try
     {
@@ -106,7 +110,7 @@ var buildReplyLink = async function(message)
 {
     //find author record:
     let msg = await Message.findOne({ message_id: message.replyto, service: message.service });
-    console.log(msg);
+    // console.log(msg);
     //if there is an author record, then link
     try
     {
@@ -163,38 +167,41 @@ var processMessage = async function(operation, message)
 
             // for each parsed object (i.e. shortlink) in the message:
 
-            //Twitter URLs
-            if (message.entities.urls)
-            {
-                for (let entity in entities.urls)
-                {
-                    await linkToken(token, message, entity.expanded_url);
-                }
-            }
+            console.log(message);
 
-            if (message.entities.hashtags)
+            if (message.entities)
             {
-                for (let entity in entities.urls)
+                //Twitter URLs
+                if (message.entities.urls)
                 {
-                    await linkToken(token, message, '#' + entity.text);
+                    for (let entity of message.entities.urls)
+                    {
+                        await linkToken(token, message, entity.expanded_url);
+                    }
+                }
+
+                if (message.entities.hashtags)
+                {
+                    for (let entity of message.entities.urls)
+                    {
+                        await linkToken(token, message, '#' + entity.text);
+                    }
                 }
             }
 
             //process for each subscriber:
-            await SubscriptionManager.processNewMessageForSubscribers(message);
         }
-
-        if (operation == 'DELETE')
-        {
-            //TODO: deal with deleted messages (we get them from twitter?)
-        }
-
-        if (operation == 'UPDATE')
-        {
-            // Should not need to do anything here
-        }
-
+        await SubscriptionManager.processNewMessageForSubscribers(message);
     }
 
+    if (operation == 'DELETE')
+    {
+        //TODO: deal with deleted messages (we get them from twitter?)
+    }
+
+    if (operation == 'UPDATE')
+    {
+        // Should not need to do anything here
+    }
     return;
 }

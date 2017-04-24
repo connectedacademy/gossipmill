@@ -36,7 +36,9 @@ module.exports = {
         
         //TODO: implement query logic to query heuristics for this set of parameters
 
-        let data = await Message.find({}).limit(params.limit);
+        let data = await Message.find({
+            select:['id']
+        });
         return Message.removeCircularReferences(data);
     },
 
