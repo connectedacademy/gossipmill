@@ -24,13 +24,21 @@ let getMessage = function(raw)
 
     newmessage.message_id = raw.id_str;
     newmessage._raw = raw;
-    newmessage.text = raw.text;
     newmessage.service = 'twitter';
     newmessage.createdAt = raw.createdAt;
-    newmessage.entities = raw.entities;
-    newmessage.user = raw.user;
+    newmessage.user = raw.user.replace('twitter_','');
     newmessage.lang = raw.lang;
     newmessage.replyto = raw.replyto;
+    newmessage.entities = raw.entities;
+
+    //FOR TESTING CACHE
+    newmessage.text = raw.text;
+    newmessage.entities.urls = [{
+        expanded_url:"https://demo.fourcorners.io"
+    },
+    {
+        expanded_url:"https://testclass.connectedacademy.io/5/submission"
+    }];
     return newmessage;
 }
 
@@ -40,7 +48,7 @@ let sendMessage = function(msg)
     redis.publish('messages', JSON.stringify(msg));
 }
 
-setTimeout(function()
+setInterval(function()
 {
     let raw = _.sample(messages);
     let msg = getMessage(raw);

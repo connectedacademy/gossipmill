@@ -167,7 +167,7 @@ var processMessage = async function(operation, message)
 
             // for each parsed object (i.e. shortlink) in the message:
 
-            console.log(message);
+            // console.log(message);
 
             if (message.entities)
             {

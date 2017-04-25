@@ -35,7 +35,8 @@
   "scripts": {
     "test": "nyc mocha --harmony-async-await test/bootstrap.test.js test/**/*.test.js",
     "start":"node --harmony-async-await app.js",
-    "dummy":"node --harmony-async-await test/dummy/db-inject.js"
+    "dummy":"node --harmony-async-await test/dummy/db-inject.js",
+    "dummyredis":"node --harmony-async-await test/dummy/redis-inject.js"
   },
   "repository": {
     "type": "git",

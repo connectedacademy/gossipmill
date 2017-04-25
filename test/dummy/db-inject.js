@@ -39,6 +39,9 @@ let messages = require('./messages.json');
 
 let sendMessage = function(msg)
 {
+    msg.entities.urls = [{
+        expanded_url:"https://testclass.connectedacademy.io/5/submission"
+    }];
     //publish to redis pubsub
     db.update('message')
     .set(msg)
