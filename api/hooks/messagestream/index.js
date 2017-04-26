@@ -33,7 +33,7 @@ module.exports = function(sails)
                 //TODO: batch update existing messages in the db (in case the relationships have changed)
                 
 
-                let unprocessed = await Message.find({processed:{'!':true}});
+                let unprocessed = await Message.find({processed:undefined});
                 sails.log.verbose('Processing ' + _.size(unprocessed) + ' records');
                 for (let msg of unprocessed)
                 {

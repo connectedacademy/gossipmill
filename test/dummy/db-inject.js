@@ -42,6 +42,7 @@ for (i=0;i<100;i++)
     raw.createdAt = new Date(raw.createdAt);
     delete raw.rid;
     delete raw.id;
+    delete processed;
     delete raw['@rid'];
     console.log("Injecting " + JSON.stringify(raw));
     sendMessage(raw);
