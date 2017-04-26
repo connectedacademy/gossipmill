@@ -29,7 +29,7 @@ let sendMessage = function(msg)
     .return('AFTER')
     .one()
     .then(function(result){
-        console.log("Message Written " + result.id);
+        console.log("Message Written " + result['@rid']);
     }).catch(function(err){
         console.log(err);
     });
@@ -41,6 +41,7 @@ for (i=0;i<100;i++)
     let raw = messages.pop();
     raw.createdAt = new Date(raw.createdAt);
     delete raw.rid;
+    delete raw.id;
     delete raw['@rid'];
     console.log("Injecting " + JSON.stringify(raw));
     sendMessage(raw);
@@ -51,6 +52,7 @@ setInterval(function()
     let raw = messages.pop();
     raw.createdAt = new Date(raw.createdAt);
     delete raw.rid;
+    delete raw.id;
     delete raw['@rid'];
     // let msg = getMessage(raw);
     console.log("Injecting " + JSON.stringify(raw));

@@ -116,7 +116,7 @@ var buildReMessageLink = async function(message)
             }
         }
         else{
-            sails.log.verbose('No Message record for building re-message ' + message.remessageto);
+            sails.log.verbose('No Message record for building re-message ' + message.remessageto.id_str);
         }
     }
     // });
