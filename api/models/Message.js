@@ -16,6 +16,9 @@ module.exports = {
         toJSON:function() {
             let obj = this.toObject();
             delete obj._raw;
+            delete obj.rid;
+            delete obj.user_from;
+            delete obj['_raw'];
             delete obj['@type'];
             delete obj['@class'];
             delete obj['@version'];
@@ -28,7 +31,9 @@ module.exports = {
         
         //TODO: implement query logic to query heuristics for this set of parameters
 
-        let data = await Message.find({}).limit(params.limit);
+        // let data = await Message.find({}).limit(params.limit);
+        let data = await Message.query("select text,entities, message_id,service, createdAt,lang,remessageto,updatedAt, first(in('author')) as author from message limit "+params.limit+" FETCHPLAN author:1");
+        //select *, first(in('author')) as author from message limit 1 FETCHPLAN author:1
         return Message.removeCircularReferences(data);
     },
 

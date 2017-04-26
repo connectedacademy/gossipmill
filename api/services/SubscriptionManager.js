@@ -30,7 +30,7 @@ module.exports = {
 
     // process a live incoming message for all known subscribers
     processNewMessageForSubscribers: async (msg)=>{
-        sails.log.verbose('Publishing message to pending subscriptions', msg);
+        sails.log.verbose('Publishing message to pending subscriptions', msg.id);
 
         for (let q in queryStore)
         {

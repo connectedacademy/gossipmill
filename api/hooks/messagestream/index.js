@@ -33,7 +33,14 @@ module.exports = function(sails)
                 //TODO: batch update existing messages in the db (in case the relationships have changed)
                 
 
-                Message.getDB().liveQuery('LIVE SELECT FROM message')
+                let unprocessed = await Message.find({processed:{'!':true}});
+                sails.log.verbose('Processing ' + _.size(unprocessed) + ' records');
+                for (let msg of unprocessed)
+                {
+                    await processMessage('INSERT', msg);
+                }
+
+                Message.getDB().liveQuery('LIVE SELECT FROM message WHERE processed <> true')
                 .on('live-update',async function(data){
                     await processMessage('UPDATE', data.content);
                 })
@@ -90,18 +97,27 @@ var linkToken = async function(token, message, field)
 
 var buildReMessageLink = async function(message)
 {
+    if (message.remessageto)
+    {
     //find author record:
-    let msg = await Message.findOne({ message_id: message.replyto, service: message.service });
-    // console.log(msg);
-    //if there is an author record, then link
-    try
-    {
-        let res = await Reply.query("CREATE EDGE remessage FROM " + message.id + " TO " + msg.id +" SET createdAt = date(\"" + new Date().toISOString() + "\", \"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\", \"UTC\")");
-        sails.log.verbose("Remessage (retweet) Linked ", res);
-    }
-    catch (e)
-    {
-        sails.log.error(e);       
+        let msg = await Message.findOne({ message_id: message.remessageto.id_str, service: message.service });
+        // console.log(msg);
+        //if there is an author record, then link
+        if (msg)
+        {
+            try
+            {
+                let res = await Reply.query("CREATE EDGE remessage FROM " + message.id + " TO " + msg.id +" SET createdAt = date(\"" + new Date().toISOString() + "\", \"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\", \"UTC\")");
+                sails.log.verbose("Remessage (retweet) Linked ", res);
+            }
+            catch (e)
+            {
+                sails.log.error(e);  
+            }
+        }
+        else{
+            sails.log.verbose('No Message record for building re-message ' + message.remessageto);
+        }
     }
     // });
 }
@@ -109,17 +125,26 @@ var buildReMessageLink = async function(message)
 var buildReplyLink = async function(message)
 {
     //find author record:
-    let msg = await Message.findOne({ message_id: message.replyto, service: message.service });
-    // console.log(msg);
-    //if there is an author record, then link
-    try
+    if (message.replyto)
     {
-        let res = await Reply.query("CREATE EDGE reply FROM " + message.id + " TO " + msg.id +" SET createdAt = date(\"" + new Date().toISOString() + "\", \"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\", \"UTC\")");
-        sails.log.verbose("Reply Linked ", res);
-    }
-    catch (e)
-    {
-        sails.log.error(e);       
+        let msg = await Message.findOne({ message_id: message.replyto, service: message.service });
+        // console.log(msg);
+        //if there is an message record, then link
+        if (msg)
+        {
+            try
+            {
+                let res = await Reply.query("CREATE EDGE reply FROM " + message.id + " TO " + msg.id +" SET createdAt = date(\"" + new Date().toISOString() + "\", \"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\", \"UTC\")");
+                sails.log.verbose("Reply Linked ", res);
+            }
+            catch (e)
+            {
+                sails.log.error(e);       
+            }
+        }
+        else{
+            sails.log.verbose('No message record for ' + message.replyto);
+        }
     }
     // });
 }
@@ -127,7 +152,7 @@ var buildReplyLink = async function(message)
 var buildAuthorLink = async function(message)
 {
     //find author record:
-    User.findOrCreate({ account_number: message.user, service: message.service },{ account_number: message.user, service: message.service },async (err,user)=>{
+    User.findOrCreate({ account_number: message.user_from.id_str, service: message.service },{ account_number: message.user_from.id_str, service: message.service, account:message.user_from.screen_name, profile:message.user_from.profile_image_url_https, name: message.user_from.name },async (err,user)=>{
         
         //if there is an author record, then link
         try
@@ -158,16 +183,11 @@ var processMessage = async function(operation, message)
         //link reply
         await buildReplyLink(message);
 
-
         //build relationship with rule:
         for (let token of sails.tokens)
         {
             // for the body of the message
             await linkToken(token,message, message.text);
-
-            // for each parsed object (i.e. shortlink) in the message:
-
-            // console.log(message);
 
             if (message.entities)
             {
@@ -191,6 +211,7 @@ var processMessage = async function(operation, message)
 
             //process for each subscriber:
         }
+        await Message.update({id:message.id},{processed:true});
         await SubscriptionManager.processNewMessageForSubscribers(message);
     }
 
