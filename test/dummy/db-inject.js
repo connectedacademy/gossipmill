@@ -12,30 +12,7 @@ let server = OrientDB({
 console.log("Connected to " + process.env.ORIENTDB_HOST);
 let db = server.use(process.env.ORIENTDB_DB);
 
-
-
-
-//EVERY N SECONDS, PUSH A NEW 'TWEET'
-
 let messages = require('./messages.json');
-
-// let getMessage = function(raw)
-// {
-//     delete raw._raw;
-
-//     let newmessage = {};
-
-//     newmessage.message_id = raw.id_str;
-//     newmessage._raw = raw;
-//     newmessage.text = raw.text;
-//     newmessage.service = 'twitter';
-//     newmessage.createdAt = new Date(raw.createdAt);
-//     newmessage.entities = raw.entities;
-//     newmessage.user = raw.user;
-//     newmessage.lang = raw.lang;
-//     newmessage.replyto = raw.replyto;
-//     return newmessage;
-// }
 
 let sendMessage = function(msg)
 {
@@ -58,9 +35,20 @@ let sendMessage = function(msg)
     });
 }
 
+//initial load:
+for (i=0;i<100;i++)
+{
+    let raw = messages.pop();
+    raw.createdAt = new Date(raw.createdAt);
+    delete raw.rid;
+    delete raw['@rid'];
+    console.log("Injecting " + JSON.stringify(raw));
+    sendMessage(raw);
+}
+
 setInterval(function()
 {
-    let raw = _.sample(messages);
+    let raw = messages.pop();
     raw.createdAt = new Date(raw.createdAt);
     delete raw.rid;
     delete raw['@rid'];
