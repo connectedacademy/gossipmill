@@ -17,7 +17,7 @@ let group_schema = {
 };
 
 module.exports = {
-    
+
     /**
      * Done
      */
@@ -43,7 +43,7 @@ module.exports = {
     services: async (req,res)=>{
         try
         {
-            sails.log.verbose('List services')        
+            sails.log.verbose('List services')
             let results = await Message.query("SELECT DISTINCT(service) FROM message LIMIT 20;");
             let normalised = _.map(results,(r)=>{
                 return {
@@ -92,7 +92,7 @@ module.exports = {
 
         try
         {
-            let messages = await SubscriptionManager.subscribe(req, params);
+            await SubscriptionManager.subscribe(req, params);
             return res.json({
                 scope: params,
                 msg: 'Subscription Updated'
@@ -102,8 +102,6 @@ module.exports = {
         {
             return res.serverError(e);
         }
-
-        return res.end();
     },
 
     list: async (req,res) => {
@@ -123,7 +121,7 @@ module.exports = {
         {
             return res.badRequest(e.mapped());
         }
-        
+
 
         let user_service = req.param('service'); //i.e. twitter
         let user_account = req.param('user');// i.e. @tombartindale
@@ -156,7 +154,7 @@ module.exports = {
         {
             return res.serverError(e);
         }
-       
+
     },
 
     totals: async (req, res)=>{
@@ -174,7 +172,7 @@ module.exports = {
         }
 
         let query = req.body.filter_by;
-        
+
         try
         {
            sails.log.verbose('Total', query);
@@ -203,7 +201,7 @@ module.exports = {
         }
 
         let query = req.body;
-        
+
         try
         {
            sails.log.verbose('Visualisation', query.group_by.name, query.filter_by);
@@ -222,7 +220,7 @@ module.exports = {
     create: async (req,res)=>{
 
         req.checkBody('credentials.service').notEmpty();
-        req.checkBody('credentials.secret').notEmpty();        
+        req.checkBody('credentials.secret').notEmpty();
         req.checkBody('credentials.key').notEmpty();
         req.checkBody('credentials.token').notEmpty();
         req.checkBody('credentials.tokenSecret').notEmpty();
@@ -239,7 +237,7 @@ module.exports = {
         {
             return res.badRequest(e.mapped());
         }
-        
+
         //send social media message:
         try {
 
@@ -253,7 +251,7 @@ module.exports = {
             if (service == 'twitter')
             {
                 sails.log.verbose('Creating message',msg);
-                
+
                 let newmessage = await Twitter.newmessage(credentials, msg);
 
                 Message.create(newmessage).exec((err, message)=>{
@@ -262,10 +260,10 @@ module.exports = {
             }
             else
             {
-                sails.log.verbose('Invalid service requested ' + service)            
+                sails.log.verbose('Invalid service requested ' + service)
                 return res.badRequest('Only Twitter is supported right now');
             }
-        } 
+        }
         catch (error) {
             return res.serverError(error);
         }

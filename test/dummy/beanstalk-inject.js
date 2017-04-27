@@ -34,8 +34,17 @@ run = async() => {
     let messages = require('./messages.json');
 
     let sendMessage = function (newmessage) {
-        newmessage.entities.hashtags = [
 
+
+        //every so often, insert submission:
+        let rand = Math.random();
+        if (rand > 0.9)
+        {
+            
+        }
+
+        newmessage.entities.hashtags = [
+            
         ],
         newmessage.entities.urls = [{
             expanded_url: "https://testclass.connectedacademy.io/submission/week1/intro"
