@@ -25,7 +25,7 @@ module.exports = {
         //TODO: implement query logic to query heuristics for this set of parameters
 
         // let data = await Message.find({}).limit(params.limit);
-        let data = await Message.query("SELECT @rid,text,entities, message_id,service, createdAt, lang, updatedAt, first(in('reply')) as reply, first(in('author')) AS author FROM message LIMIT "+params.depth+" FETCHPLAN author:1 reply:1");
+        let data = await Message.query("SELECT @rid,text,entities, message_id,service, createdAt, lang, updatedAt, first(in('reply')) as reply, first(in('author')) AS author FROM message WHERE processed=true LIMIT "+params.depth+" FETCHPLAN author:1 reply:1");
         data = _.map(data,(o)=>_.omit(o,['@version','@type']));
         return Message.removeCircularReferences(data);
     },
