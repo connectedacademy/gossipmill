@@ -62,7 +62,7 @@ module.exports = {
     subscribe: async (req,res)=>{
 
         req.checkBody(filter_schema);
-        req.checkBody('limit').isInt();
+        req.checkBody('depth').isInt();
         req.checkParams('service').notEmpty();
         req.checkParams('user').notEmpty();
 
@@ -108,7 +108,7 @@ module.exports = {
 
     list: async (req,res) => {
 
-        req.checkBody('limit').isInt();
+        req.checkBody('depth').isInt();
         req.checkBody(filter_schema);
         console.log("DOING LIST");
         req.checkParams('service').notEmpty();
@@ -129,10 +129,10 @@ module.exports = {
         let user_account = req.param('user');// i.e. @tombartindale
 
 
-        let limit = req.query.limit || process.env.DEFAULT_LIMIT;
+        let depth = req.query.depth || process.env.DEFAULT_DEPTH;
 
         let params = {
-            limit: limit,
+            depth: depth,
             query: req.body.filter_by
         }
 

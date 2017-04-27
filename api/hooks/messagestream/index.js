@@ -41,15 +41,26 @@ module.exports = function(sails)
                 }
 
                 Message.getDB().liveQuery('LIVE SELECT FROM message WHERE processed <> true')
-                .on('live-update',async function(data){
-                    await processMessage('UPDATE', data.content);
-                })
+                // .on('live-update',async function(data){
+                //     await processMessage('UPDATE', data.content);
+                // })
                 .on('live-insert',async function(data){
                     await processMessage('INSERT', data.content);
-                })
-                .on('live-delete',async function(data){
-                    await processMessage('DELETE', data.content);
                 });
+                // .on('live-delete',async function(data){
+                //     await processMessage('DELETE', data.content);
+                // });
+
+                Message.getDB().liveQuery('LIVE SELECT FROM message WHERE processed = true')
+                .on('live-update',async function(data){
+                    await processMessage('UPDATE', data.content);
+                });
+                // .on('live-insert',async function(data){
+                //     await processMessage('INSERT', data.content);
+                // })
+                // .on('live-delete',async function(data){
+                //     await processMessage('DELETE', data.content);
+                // });
 
                 
                 cb();
@@ -212,7 +223,7 @@ var processMessage = async function(operation, message)
             //process for each subscriber:
         }
         await Message.update({id:message.id},{processed:true});
-        await SubscriptionManager.processNewMessageForSubscribers(message);
+        
     }
 
     if (operation == 'DELETE')
@@ -223,6 +234,7 @@ var processMessage = async function(operation, message)
     if (operation == 'UPDATE')
     {
         // Should not need to do anything here
+        await SubscriptionManager.processNewMessageForSubscribers(message);
     }
     return;
 }
