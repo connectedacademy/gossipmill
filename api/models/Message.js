@@ -42,7 +42,8 @@ module.exports = {
 
             for (let token in tokens)
             {
-                query+=" AND in('tokenin') contains first((SELECT FROM token WHERE name IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "] AND type = '"+ token +"'))";
+                // query+=" AND in('tokenin') contains first((SELECT FROM token WHERE name IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "] AND type = '"+ token +"'))";
+                query+=" AND in('tokenin') contains (name IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "] AND type = '"+ token +"')";
             }
 
             query += " LIMIT "+params.depth;
