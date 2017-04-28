@@ -110,7 +110,7 @@ module.exports = {
         req.checkBody('depth').isInt();
         req.checkBody(filter_schema);
         req.checkBody('lang').notEmpty();
-        console.log("DOING LIST");
+        // console.log("DOING LIST");
         req.checkParams('service').notEmpty();
         req.checkParams('user').notEmpty();
 
@@ -144,7 +144,13 @@ module.exports = {
         try
         {
             let messages = await Message.heuristicQuery(params);
-            console.log(messages);
+            // console.log(messages);
+
+            params.query = _.groupBy(params.query,'name');
+            params.query = _.mapValues(params.query,(t)=>{
+                return _.pluck(t,'query');
+            });
+
             return res.json({
                 scope: _.merge(params,{
                     length: messages.length
