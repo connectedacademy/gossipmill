@@ -46,7 +46,7 @@ module.exports = {
                 query+=" AND in('tokenin') contains (name IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "] AND type = '"+ token +"')";
             }
 
-            query += " LIMIT "+params.depth;
+            // query += " LIMIT "+params.depth;
             query += " FETCHPLAN author:1 reply:1";
 
             // console.log(query);
