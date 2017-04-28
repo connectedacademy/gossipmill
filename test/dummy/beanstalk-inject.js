@@ -57,10 +57,10 @@ let run = async() => {
         {
             let klass = _.sample(testspec.classes);
             let content = _.sample(klass.content);
-            let seconds = Math.round(Math.random() * 600);
-            newmessage.entities.urls.push({
-                expanded_url: `https://testclass.connectedacademy.io/course/${klass.slug}/${content.slug}`
-            });
+            if (content.slug)
+                newmessage.entities.urls.push({
+                    expanded_url: `https://testclass.connectedacademy.io/course/${klass.slug}/${content.slug}`
+                });
         }
 
         //give a mix of whether it is a message that relates to a particular place in the course:
@@ -68,9 +68,10 @@ let run = async() => {
         let content = _.sample(klass.content);
         let seconds = Math.round(Math.random() * 600);
 
-        newmessage.entities.urls.push({
-            expanded_url: `https://testclass.connectedacademy.io/course/${klass.slug}/${content.slug}/${seconds}`
-        });
+        if (content.slug)
+            newmessage.entities.urls.push({
+                expanded_url: `https://testclass.connectedacademy.io/course/${klass.slug}/${content.slug}/${seconds}`
+            });
 
         // newmessage.entities.hashtags = [
 
