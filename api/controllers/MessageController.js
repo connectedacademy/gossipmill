@@ -65,6 +65,7 @@ module.exports = {
         req.checkBody('depth').isInt();
         req.checkParams('service').notEmpty();
         req.checkParams('user').notEmpty();
+        req.checkBody('lang').notEmpty();
 
         try
         {
@@ -108,6 +109,7 @@ module.exports = {
 
         req.checkBody('depth').isInt();
         req.checkBody(filter_schema);
+        req.checkBody('lang').notEmpty();
         console.log("DOING LIST");
         req.checkParams('service').notEmpty();
         req.checkParams('user').notEmpty();

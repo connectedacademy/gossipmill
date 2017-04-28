@@ -26,7 +26,30 @@ module.exports = {
 
         //DEPTH IN THIS CASE MEANS ONLY n messages for each of the segments
 
-        let data = await Message.query("SELECT @rid,text,entities, message_id,service, createdAt, lang, updatedAt, in('tokenin').include('name','type') AS tokens, first(in('reply')) as reply, first(in('author')).exclude('_raw') AS author FROM message WHERE processed=true LIMIT "+params.depth+" FETCHPLAN author:1 reply:1");
+        let lang = params.lang;
+        // console.log(params);
+
+        let query = "SELECT @rid,text,entities, message_id,service, createdAt, lang, updatedAt, in('tokenin').include('name','type') AS tokens, first(in('reply')) as reply, first(in('author')).exclude('_raw') AS author \
+            FROM message \
+            WHERE processed=true";
+            if (lang)
+                query+=" AND lang='"+lang+"'";
+
+            let tokens = _.groupBy(params.query,'name');
+            tokens = _.mapValues(tokens,(t)=>{
+                return _.pluck(t,'query');
+            });
+
+            for (let token in tokens)
+            {
+                query+=" AND in('tokenin') contains first((SELECT FROM token WHERE name IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "] AND type = '"+ token +"'))";
+            }
+
+            query += " LIMIT "+params.depth;
+            query += " FETCHPLAN author:1 reply:1";
+
+            // console.log(query);
+        let data = await Message.query(query);
         data = _.map(data,(o)=>_.omit(o,['@version','@type']));
         return Message.removeCircularReferences(data);
     },
