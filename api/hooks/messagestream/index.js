@@ -5,10 +5,10 @@ module.exports = function(sails)
 
             sails.on('hook:orm:loaded', async function() {
 
-                // Message.getDB().liveQuery('LIVE SELECT FROM message WHERE processed = true')
-                // .on('live-update',async function(data){
-                //     await processMessage('UPDATE', data.content);
-                // });
+                Message.getDB().liveQuery('LIVE SELECT FROM message WHERE processed = true')
+                .on('live-update',async function(data){
+                    await processMessage('UPDATE', data.content);
+                });
                 // .on('live-insert',async function(data){
                 //     await processMessage('INSERT', data.content);
                 // })

@@ -36,6 +36,7 @@ let run = async() => {
 
 
     let messages = require('./messages.json');
+    let all = require('./messages.json');
 
     let sendMessage = function (newmessage) {
 
@@ -83,17 +84,45 @@ let run = async() => {
         //     expanded_url: "https://testclass.connectedacademy.io/course/week1/liveclass/64"
         // }];
 
-        let msg = JSON.stringify({ type: 'message', payload: newmessage });
-        beanstalk.put(10, 0, 50000000, msg, function (err, jobid) {
-            if (err)
-                console.log(err);
-            console.log("Submitted", newmessage.message_id);
-        });
+        rand = Math.random()
+        if (rand > 0.9)
+        {
+            let nm = {
+                message_id:newmessage.message_id
+            }
+            let msg = JSON.stringify({ type: 'delete', payload: nm });
+            beanstalk.put(10, 0, 50000000, msg, function (err, jobid) {
+                if (err)
+                    console.log(err);
+                console.log("Delete Submitted", newmessage.message_id);
+            });
+        }
+        else if (rand > 0.8)
+        {
+            let nm = {
+                message_id:newmessage.message_id
+            }
+            let msg = JSON.stringify({ type: 'rmgeo', payload: nm });
+            beanstalk.put(10, 0, 50000000, msg, function (err, jobid) {
+                if (err)
+                    console.log(err);
+                console.log("RmGeo Submitted", newmessage.message_id);
+            });
+        }
+        else
+        {
+            let msg = JSON.stringify({ type: 'message', payload: newmessage });
+            beanstalk.put(10, 0, 50000000, msg, function (err, jobid) {
+                if (err)
+                    console.log(err);
+                console.log("Submitted", newmessage.message_id);
+            });
+        }
     }
 
     //initial load:
-    for (let i = 0; i < 300; i++) {
-        let raw = messages.pop();
+    for (let msg of all) {
+        let raw = msg;
         raw.createdAt = new Date(raw.createdAt);
         delete raw.rid;
         delete raw.id;

@@ -29,7 +29,7 @@ module.exports = {
         let lang = params.lang;
         // console.log(params);
 
-        let query = "SELECT @rid,text,entities, message_id,service, createdAt, lang, updatedAt, in('tokenin').include('name','type') AS tokens, first(in('reply')) as reply, first(in('author')).exclude('_raw') AS author \
+        let query = "SELECT @rid,text,entities, message_id,service, createdAt, lang, updatedAt, in('tokenin').include('name','type') AS tokens, first(in('reply')) as reply, first(in('author')).exclude('_raw','out_author','credentials','app_credentials') AS author \
             FROM message \
             WHERE processed=true";
             if (lang)
