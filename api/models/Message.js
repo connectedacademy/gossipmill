@@ -29,6 +29,8 @@ module.exports = {
         let lang = params.lang;
         // console.log(params);
 
+        //TODO: group by and limit per segment:
+
         let query = "SELECT @rid,text,entities, message_id,service, createdAt, lang, updatedAt, in('tokenin').include('name','type') AS tokens, first(in('reply')) as reply, first(in('author')).exclude('_raw','out_author','credentials','app_credentials') AS author \
             FROM message \
             WHERE processed=true";
@@ -42,7 +44,6 @@ module.exports = {
 
             for (let token in tokens)
             {
-                // query+=" AND in('tokenin') contains first((SELECT FROM token WHERE name IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "] AND type = '"+ token +"'))";
                 query+=" AND in('tokenin') contains (name IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "] AND type = '"+ token +"')";
             }
 
@@ -57,12 +58,42 @@ module.exports = {
 
     heuristicGroup: async (params)=>{
 
+        //THIS IS USED FOR GENERATING VISUALISATIONS
+
+        console.log(params);
+        let lang = params.lang;
+
+        let query = "SELECT @rid, in('tokenin').include('name','type') AS tokens \
+            FROM message \
+            WHERE processed=true";
+            if (lang)
+                query+=" AND lang='"+lang+"'";
+
+            let tokens = _.groupBy(params.filter_by,'name');
+            tokens = _.mapValues(tokens,(t)=>{
+                return _.pluck(t,'query');
+            });
+
+            for (let token in tokens)
+            {
+                query+=" AND in('tokenin') contains (name IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "] AND type = '"+ token +"')";
+            }
+
+            // query += " GROUP BY in('tokenin')";
+            // query += " FETCHPLAN author:1 reply:1";
+
+            console.log(query);
+        let data = await Message.query(query);
+        data = _.map(data,(o)=>_.omit(o,['@version','@type']));
+        return Message.removeCircularReferences(data);
+
+
         //TODO: implement query logic to query heuristics for this set of parameters
 
-        let data = await Message.find({
-            select:['id']
-        });
-        return Message.removeCircularReferences(data);
+        // let data = await Message.find({
+        //     select:['id']
+        // });
+        // return Message.removeCircularReferences(data);
     },
 
     /**
@@ -73,16 +104,27 @@ module.exports = {
      */
     heuristicTotal: async (params)=>{
 
-        //TODO: implement query logic to query heuristics for this set of parameters
+        let query = "SELECT COUNT(@rid) as total \
+            FROM message \
+            WHERE processed=true";
 
-        let data = await Message.query("SELECT COUNT(id) as total FROM message");
-        // console.log(data);
-        return {
-            total:_.first(data).total
-        };
+            let tokens = _.groupBy(params,'name');
+            tokens = _.mapValues(tokens,(t)=>{
+                return _.pluck(t,'query');
+            });
+
+            for (let token in tokens)
+            {
+                query+=" AND in('tokenin') contains (name IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "] AND type = '"+ token +"')";
+            }
+
+        let data = await Message.query(query);
+        data = _.map(data,(o)=>_.omit(o,['@version','@type']));
+        return Message.removeCircularReferences(data);
     },
 
     heuristicInMemory: async (params, message)=>{
+        //TODO: perform some of the above logic to determine if this message should be passed to the subscriber
         return message;
     }
 }

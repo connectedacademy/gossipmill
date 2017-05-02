@@ -23,7 +23,7 @@ module.exports = {
         let roomname = 'query-'+req.session.id;
         delete queryStore[roomname];
         sails.sockets.leave(roomname);
-        sails.log.verbose('Leaving room', roomname);        
+        sails.log.verbose('Leaving room', roomname);
         return;
     },
 
@@ -34,7 +34,7 @@ module.exports = {
 
         for (let q in queryStore)
         {
-            let roomname = q;
+            // let roomname = q;
             let query = queryStore[q];
 
             if (Message.heuristicInMemory(query, msg))

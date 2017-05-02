@@ -1,7 +1,8 @@
 let _ = require('lodash');
 let fivebeans = require('fivebeans');
 let request = require('request-promise-native');
-let yaml = require('js-yaml')
+let yaml = require('js-yaml');
+let uuid = require('uuid');
 
 let beanstalk = new fivebeans.client(process.env.BEANSTALK_SERVER, 11300);
 
@@ -120,17 +121,32 @@ let run = async() => {
         }
     }
 
-    //initial load:
-    for (let msg of all) {
+    let wrangle = async function(msg)
+    {
         let raw = msg;
         raw.createdAt = new Date(raw.createdAt);
         delete raw.rid;
+        raw.message_id = uuid();
         delete raw.id;
         delete raw.processed;
         delete raw['@rid'];
         // console.log("Injecting " + JSON.stringify(raw));
         sendMessage(raw);
     }
+
+    //initial load:
+    for (let msg of all) {
+        wrangle(msg);
+    }
+
+    for (let msg of all) {
+        wrangle(msg);
+    }
+
+    for (let msg of all) {
+        wrangle(msg);
+    }
+
 
     setInterval(function () {
         let raw = messages.pop();

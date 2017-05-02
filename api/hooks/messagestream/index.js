@@ -8,7 +8,7 @@ module.exports = function(sails)
                 Message.getDB().liveQuery('LIVE SELECT FROM message WHERE processed = true')
                 .on('live-update',async function(data){
                     await processMessage('UPDATE', data.content);
-                });
+                })
                 // .on('live-insert',async function(data){
                 //     await processMessage('INSERT', data.content);
                 // })
@@ -29,6 +29,7 @@ var processMessage = async function(operation, message)
     if (operation == 'DELETE')
     {
         //TODO: deal with deleted messages (we get them from twitter?)
+
     }
 
     if (operation == 'UPDATE')
