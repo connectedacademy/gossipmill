@@ -61,21 +61,22 @@ module.exports = {
 
     subscribe: async (req,res)=>{
 
-        req.checkBody(filter_schema);
-        req.checkBody('depth').isInt();
-        req.checkParams('service').notEmpty();
-        req.checkParams('user').notEmpty();
-        req.checkBody('lang').notEmpty();
+        //TODO -- validation is not working on socker connections
+        // req.checkBody(filter_schema);
+        // req.checkBody('depth').isInt();
+        // req.checkParams('service').notEmpty();
+        // req.checkParams('user').notEmpty();
+        // req.checkBody('lang').notEmpty();
 
-        try
-        {
-            let result = await req.getValidationResult();
-            result.throw();
-        }
-        catch (e)
-        {
-            return res.badRequest(e.mapped());
-        }
+        // try
+        // {
+        //     let result = await req.getValidationResult();
+        //     result.throw();
+        // }
+        // catch (e)
+        // {
+        //     return res.badRequest(e.mapped());
+        // }
 
         //initiate subscribe
 
@@ -93,9 +94,10 @@ module.exports = {
 
         try
         {
-            await SubscriptionManager.subscribe(req, params);
+            let roomname = await SubscriptionManager.subscribe(req, params);
             return res.json({
                 scope: params,
+                room: roomname,
                 msg: 'Subscription Updated'
             });
         }

@@ -1,13 +1,12 @@
 let queryStore = {};
-
-
+let uuid = require('uuid');
 
 module.exports = {
 
     //subscribe to a given query
     subscribe: async (req, subscription)=>{
 
-        let roomname = 'query-'+req.session.id;
+        let roomname = 'query-'+uuid();
 
         queryStore[roomname] = subscription;
 
@@ -15,7 +14,10 @@ module.exports = {
 
         sails.sockets.join(req.socket, roomname, ()=>{
             sails.log.verbose('Subscribed to room', roomname);
+            sails.sockets.broadcast(roomname,roomname, {test:'Welcome to ' + roomname});
         });
+
+        return roomname;
     },
 
     // unsubscribe for a given query
