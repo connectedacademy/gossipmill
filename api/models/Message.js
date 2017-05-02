@@ -31,7 +31,7 @@ module.exports = {
 
         //TODO: group by and limit per segment:
 
-        let query = "SELECT @rid,text,entities, message_id,service, createdAt, lang, updatedAt, in('tokenin').include('name','type') AS tokens, first(in('reply')) as reply, first(in('author')).exclude('_raw','out_author','credentials','app_credentials') AS author \
+        let query = "SELECT @rid,text,entities, message_id,service, createdAt, lang, updatedAt, in('tokenin').include('name','type') AS tokens, first(in('reply')) as reply, first(in('author')).exclude('_raw','out_author','credentials','app_credentials','user_from','remessageto') AS author \
             FROM message \
             WHERE processed=true";
             if (lang)
@@ -50,7 +50,7 @@ module.exports = {
             // query += " LIMIT "+params.depth;
             query += " FETCHPLAN author:1 reply:1";
 
-            // console.log(query);
+            console.log(query);
         let data = await Message.query(query);
         data = _.map(data,(o)=>_.omit(o,['@version','@type']));
         return Message.removeCircularReferences(data);
@@ -58,42 +58,34 @@ module.exports = {
 
     heuristicGroup: async (params)=>{
 
-        //THIS IS USED FOR GENERATING VISUALISATIONS
-
-        console.log(params);
+        // console.log(params);
         let lang = params.lang;
+        let grouper = params.group_by.name;
 
-        let query = "SELECT @rid, in('tokenin').include('name','type') AS tokens \
+        let query = "SELECT count(*), "+grouper+".name FROM(SELECT first(in('tokenin')[type='"+grouper+"']) as segment \
             FROM message \
             WHERE processed=true";
-            if (lang)
-                query+=" AND lang='"+lang+"'";
+        if (lang)
+            query+=" AND lang='"+lang+"'";
 
-            let tokens = _.groupBy(params.filter_by,'name');
-            tokens = _.mapValues(tokens,(t)=>{
-                return _.pluck(t,'query');
-            });
+        let tokens = _.groupBy(params.filter_by,'name');
+        tokens = _.mapValues(tokens,(t)=>{
+            return _.pluck(t,'query');
+        });
 
-            for (let token in tokens)
-            {
-                query+=" AND in('tokenin') contains (name IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "] AND type = '"+ token +"')";
-            }
+        for (let token in tokens)
+        {
+            query+=" AND in('tokenin') contains (name IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "] AND type = '"+ token +"')";
+        }
 
-            // query += " GROUP BY in('tokenin')";
-            // query += " FETCHPLAN author:1 reply:1";
+        query += ") GROUP BY segment.name";
 
-            console.log(query);
+        // console.log(query);
         let data = await Message.query(query);
+        // console.log(data);
+
         data = _.map(data,(o)=>_.omit(o,['@version','@type']));
         return Message.removeCircularReferences(data);
-
-
-        //TODO: implement query logic to query heuristics for this set of parameters
-
-        // let data = await Message.find({
-        //     select:['id']
-        // });
-        // return Message.removeCircularReferences(data);
     },
 
     /**
