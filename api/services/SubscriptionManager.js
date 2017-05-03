@@ -6,33 +6,32 @@ module.exports = {
     //subscribe to a given query
     subscribe: async (req, subscription)=>{
 
-        let roomname = 'query-'+uuid();
+        let roomname = 'query-'+subscription.socketid;
 
         queryStore[roomname] = subscription;
 
-        sails.log.verbose('Attempting subscribe to', roomname);
+        sails.log.verbose('Attempting subscribe to / update', roomname);
 
         sails.sockets.join(req.socket, roomname, ()=>{
             sails.log.verbose('Subscribed to room', roomname);
-            sails.sockets.broadcast(roomname,roomname, {test:'Welcome to ' + roomname});
         });
 
         return roomname;
     },
 
-    // unsubscribe for a given query
-    unsubscribe: async (req,res)=>{
-        let roomname = 'query-'+req.session.id;
-        delete queryStore[roomname];
-        sails.sockets.leave(roomname);
-        sails.log.verbose('Leaving room', roomname);
-        return;
-    },
+    // // unsubscribe for a given query
+    // unsubscribe: async (req)=>{
+    //     let roomname = 'query-'+req.session.id;
+    //     delete queryStore[roomname];
+    //     sails.sockets.leave(roomname);
+    //     sails.log.verbose('Leaving room', roomname);
+    //     return;
+    // },
 
 
     // process a live incoming message for all known subscribers
-    processNewMessageForSubscribers: async (msg)=>{
-        sails.log.verbose('Publishing message to pending subscriptions', msg.id);
+    processNewMessageForSubscribers: (msg)=>{
+        sails.log.verbose('Publishing message to pending subscriptions', msg.message_id);
 
         for (let q in queryStore)
         {
@@ -41,12 +40,12 @@ module.exports = {
 
             if (Message.heuristicInMemory(query, msg))
             {
-                sails.socket.broadcast(q, msg);
-                sails.log.verbose('Message sent to', msg, query);
+                sails.sockets.broadcast(q, q, msg);
+                sails.log.verbose('Message sent to', msg.message_id, query);
             }
             else
             {
-                sails.log.verbose('Message not matching heuristic', msg, query);
+                sails.log.verbose('Message not matching heuristic', msg.message_id, query);
             }
         }
         return;

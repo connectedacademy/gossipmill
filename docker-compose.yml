@@ -2,7 +2,7 @@ version: '2'
 networks:
   dev_ca-back-network:
     external: true
-    
+
 services:
   gossipmill:
     build: .
@@ -13,10 +13,10 @@ services:
       - ./test:/usr/src/app/test:ro
       - ./.sailsrc:/usr/src/app/.sailsrc
       - ../spec:/usr/src/app/spec:ro
-    command: nodemon --debug=0.0.0.0:5857 -x "node --harmony-async-await" -L app.js
+    command: nodemon --debug=0.0.0.0:5857 -x "node --stack-size=200000 --harmony-async-await" -L app.js
     ports:
       - "3000:1337"
       - "5857:5857"
-    networks: 
+    networks:
       - dev_ca-back-network
     env_file: .env

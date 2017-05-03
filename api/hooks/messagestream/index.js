@@ -5,10 +5,10 @@ module.exports = function(sails)
 
             sails.on('hook:orm:loaded', async function() {
 
-                // Message.getDB().liveQuery('LIVE SELECT FROM message WHERE processed = true')
-                // .on('live-update',async function(data){
-                //     await processMessage('UPDATE', data.content);
-                // })
+                Message.getDB().liveQuery('LIVE SELECT message_id FROM message WHERE processed = true')
+                .on('live-update',async function(data){
+                    await processMessage('UPDATE', data.content);
+                });
                 // .on('live-insert',async function(data){
                 //     await processMessage('INSERT', data.content);
                 // })
@@ -21,7 +21,7 @@ module.exports = function(sails)
     }
 }
 
-var processMessage = async function(operation, message)
+var processMessage = function(operation, message)
 {
     //for each rule in settings
     sails.log.verbose("Process Message",operation,message.id);
@@ -35,7 +35,7 @@ var processMessage = async function(operation, message)
     if (operation == 'UPDATE')
     {
         // Should not need to do anything here
-        await SubscriptionManager.processNewMessageForSubscribers(message);
+        SubscriptionManager.processNewMessageForSubscribers(message);
     }
     return;
 }
