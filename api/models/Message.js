@@ -31,21 +31,23 @@ module.exports = {
 
         //TODO: group by and limit per segment:
 
-        let query = "SELECT @rid,text,entities, message_id,service, createdAt, lang, updatedAt, first(in('reply')) as reply, first(in('author')).exclude('_raw','out_author','credentials','app_credentials','user_from','remessageto') AS author \
+        let tokens = _.groupBy(params.query,'name');
+        tokens = _.mapValues(tokens,(t)=>{
+            return _.pluck(t,'query');
+        });
+
+        let query = "SELECT @rid,text,entities, message_id,service,"+_.keys(tokens).join(',')+", createdAt, lang, updatedAt, first(in('reply')) as reply, first(in('author')).exclude('_raw','out_author','credentials','app_credentials','user_from','remessageto') AS author \
             FROM message \
             WHERE processed=true";
-            if (lang)
-                query+=" AND lang='"+lang+"'";
+        if (lang)
+            query+=" AND lang='"+lang+"'";
 
-            let tokens = _.groupBy(params.query,'name');
-            tokens = _.mapValues(tokens,(t)=>{
-                return _.pluck(t,'query');
-            });
 
-            for (let token in tokens)
-            {
-                query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
-            }
+
+        for (let token in tokens)
+        {
+            query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
+        }
 
             // query += " LIMIT "+params.depth;
             query += " FETCHPLAN author:1 reply:1";
@@ -107,7 +109,7 @@ module.exports = {
 
             for (let token in tokens)
             {
-                query+=" AND in('tokenin') contains (name IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "] AND type = '"+ token +"')";
+                query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
             }
 
         let data = await Message.query(query);
