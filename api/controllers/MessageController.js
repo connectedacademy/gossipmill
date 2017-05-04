@@ -112,7 +112,6 @@ module.exports = {
         req.checkBody('depth').isInt();
         req.checkBody(filter_schema);
         req.checkBody('lang').notEmpty();
-        // console.log("DOING LIST");
         req.checkParams('service').notEmpty();
         req.checkParams('user').notEmpty();
 
@@ -167,6 +166,9 @@ module.exports = {
 
     },
 
+    /**
+     * Done
+     */
     totals: async (req, res)=>{
 
         req.checkBody(filter_schema);
@@ -195,6 +197,9 @@ module.exports = {
         }
     },
 
+    /**
+     * Done
+     */
     visualisation: async (req,res)=>{
 
         req.checkBody(group_schema);

@@ -1,3 +1,6 @@
+let Redis = require('ioredis');
+let redis = new Redis(process.env.REDIS_PORT, process.env.REDIS_HOST); //new Redis(6379, '192.168.1.1')
+
 module.exports = function(sails)
 {
     return {
@@ -5,16 +8,16 @@ module.exports = function(sails)
 
             sails.on('hook:orm:loaded', async function() {
 
-                Message.getDB().liveQuery('LIVE SELECT message_id FROM message WHERE processed = true')
-                .on('live-update',async function(data){
-                    await processMessage('UPDATE', data.content);
+                redis.subscribe('messages', function (err, count) {
+                    sails.log.info('Subscribed to messages channel on Redis');
                 });
-                // .on('live-insert',async function(data){
-                //     await processMessage('INSERT', data.content);
-                // })
-                // .on('live-delete',async function(data){
-                //     await processMessage('DELETE', data.content);
-                // });
+
+                redis.on('message', function (channel, message) {
+                    // let msg = JSON.parse(message);
+                    sails.log.verbose('PubSub Message',message);
+                    processMessage('UPDATE',message);
+                });
+
                 cb();
             });
         }

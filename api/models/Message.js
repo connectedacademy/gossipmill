@@ -31,7 +31,7 @@ module.exports = {
 
         //TODO: group by and limit per segment:
 
-        let query = "SELECT @rid,text,entities, message_id,service, createdAt, lang, updatedAt, in('tokenin').include('name','type') AS tokens, first(in('reply')) as reply, first(in('author')).exclude('_raw','out_author','credentials','app_credentials','user_from','remessageto') AS author \
+        let query = "SELECT @rid,text,entities, message_id,service, createdAt, lang, updatedAt, first(in('reply')) as reply, first(in('author')).exclude('_raw','out_author','credentials','app_credentials','user_from','remessageto') AS author \
             FROM message \
             WHERE processed=true";
             if (lang)
@@ -44,7 +44,7 @@ module.exports = {
 
             for (let token in tokens)
             {
-                query+=" AND in('tokenin') contains (name IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "] AND type = '"+ token +"')";
+                query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
             }
 
             // query += " LIMIT "+params.depth;
@@ -62,7 +62,7 @@ module.exports = {
         let lang = params.lang;
         let grouper = params.group_by.name;
 
-        let query = "SELECT count(*), "+grouper+".name FROM(SELECT first(in('tokenin')[type='"+grouper+"']) as segment \
+        let query = "SELECT count(*), "+grouper+" \
             FROM message \
             WHERE processed=true";
         if (lang)
@@ -75,12 +75,12 @@ module.exports = {
 
         for (let token in tokens)
         {
-            query+=" AND in('tokenin') contains (name IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "] AND type = '"+ token +"')";
+            query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
         }
 
-        query += ") GROUP BY segment.name";
+        query += " GROUP BY " + grouper;
 
-        // console.log(query);
+        console.log(query);
         let data = await Message.query(query);
         // console.log(data);
 

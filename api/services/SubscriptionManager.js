@@ -30,22 +30,25 @@ module.exports = {
 
 
     // process a live incoming message for all known subscribers
-    processNewMessageForSubscribers: (msg)=>{
+    processNewMessageForSubscribers: async (msg)=>{
         sails.log.verbose('Publishing message to pending subscriptions', msg.message_id);
+
+        let message = await Message.findOne({message_id:msg});
+        Message.removeCircularReferences(message);
 
         for (let q in queryStore)
         {
             // let roomname = q;
             let query = queryStore[q];
 
-            if (Message.heuristicInMemory(query, msg))
+            if (Message.heuristicInMemory(query, message))
             {
-                sails.sockets.broadcast(q, q, msg);
-                sails.log.verbose('Message sent to', msg.message_id, query);
+                sails.sockets.broadcast(q, q, message);
+                sails.log.verbose('Message sent to', message.message_id, query);
             }
             else
             {
-                sails.log.verbose('Message not matching heuristic', msg.message_id, query);
+                sails.log.verbose('Message not matching heuristic', message.message_id, query);
             }
         }
         return;
