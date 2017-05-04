@@ -112,8 +112,8 @@ module.exports = {
                 query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
             }
 
-        let data = await Message.query(query);
-        data = _.map(data,(o)=>_.omit(o,['@version','@type']));
+        let data = _.first(await Message.query(query));
+        data = _.omit(data,['@version','@type']);
         return Message.removeCircularReferences(data);
     },
 
