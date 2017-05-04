@@ -50,7 +50,7 @@ module.exports = {
             // query += " LIMIT "+params.depth;
             query += " FETCHPLAN author:1 reply:1";
 
-            console.log(query);
+            // console.log(query);
         let data = await Message.query(query);
         data = _.map(data,(o)=>_.omit(o,['@version','@type']));
         return Message.removeCircularReferences(data);
@@ -80,7 +80,7 @@ module.exports = {
 
         query += " GROUP BY " + grouper;
 
-        console.log(query);
+        // console.log(query);
         let data = await Message.query(query);
         // console.log(data);
 
