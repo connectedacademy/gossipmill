@@ -24,7 +24,7 @@ module.exports.http = {
           {
             for (let f of value)
             {
-              if (!f.name || !f.query)
+              if (!f.name || !typeof(f.query) == undefined)
                 return false;
             }
             return true;
