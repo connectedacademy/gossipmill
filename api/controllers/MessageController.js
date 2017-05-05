@@ -114,6 +114,7 @@ module.exports = {
         req.checkBody('lang').notEmpty();
         req.checkParams('service').notEmpty();
         req.checkParams('user').notEmpty();
+        req.checkBody('whitelist').notEmpty().isBoolean();
 
         try
         {
@@ -139,6 +140,7 @@ module.exports = {
 
         params.account = user_account;
         params.service = user_service;
+        params.whitelist = req.param('whitelist');
 
         sails.log.verbose('Query messages', params);
 
@@ -204,6 +206,7 @@ module.exports = {
 
         req.checkBody(group_schema);
         req.checkBody(filter_schema);
+        req.checkBody('whitelist').notEmpty().isBoolean();
 
         try
         {
