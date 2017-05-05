@@ -130,7 +130,7 @@ module.exports = {
         let user_account = req.param('user');// i.e. @tombartindale
 
 
-        let depth = req.query.depth || process.env.DEFAULT_DEPTH;
+        let depth = req.body.depth || process.env.DEFAULT_DEPTH;
 
         let params = {
             depth: depth,
