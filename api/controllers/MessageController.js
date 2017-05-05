@@ -174,6 +174,7 @@ module.exports = {
     totals: async (req, res)=>{
 
         req.checkBody(filter_schema);
+        req.checkBody(group_schema);
 
         try
         {
@@ -185,7 +186,7 @@ module.exports = {
             return res.badRequest(e.mapped());
         }
 
-        let query = req.body.filter_by;
+        let query = req.body;
 
         try
         {

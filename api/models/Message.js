@@ -98,21 +98,23 @@ module.exports = {
      */
     heuristicTotal: async (params)=>{
 
-        let query = "SELECT COUNT(@rid) as total \
+        let query = "SELECT COUNT(@rid) as total, " + params.group_by.name + " \
             FROM message \
             WHERE processed=true";
 
-            let tokens = _.groupBy(params,'name');
-            tokens = _.mapValues(tokens,(t)=>{
-                return _.pluck(t,'query');
-            });
+        let tokens = _.groupBy(params.filter_by,'name');
+        tokens = _.mapValues(tokens,(t)=>{
+            return _.pluck(t,'query');
+        });
 
-            for (let token in tokens)
-            {
-                query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
-            }
+        for (let token in tokens)
+        {
+            query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
+        }
 
-        let data = _.first(await Message.query(query));
+        query += " GROUP BY " + params.group_by.name;
+
+        let data = await Message.query(query);
         data = _.omit(data,['@version','@type']);
         return Message.removeCircularReferences(data);
     },
