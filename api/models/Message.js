@@ -19,6 +19,13 @@ module.exports = {
         }
     },
 
+    //TODO: Bubble up the 'most interesting thing' in the segment query
+
+    //TODO: Send back summary information (like most used hashtags, users, number of tweets etc)
+
+
+
+
     // query with a given criteria statically
     heuristicQuery: async (params)=>{
 
@@ -42,8 +49,6 @@ module.exports = {
         if (lang)
             query+=" AND lang='"+lang+"'";
 
-
-
         for (let token in tokens)
         {
             query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
@@ -55,9 +60,13 @@ module.exports = {
             // console.log(query);
         let data = await Message.query(query);
         data = _.map(data,(o)=>_.omit(o,['@version','@type']));
+
         return Message.removeCircularReferences(data);
     },
 
+    /**
+     * For visualisation / linear timeline of data
+     */
     heuristicGroup: async (params)=>{
 
         // console.log(params);
@@ -100,7 +109,7 @@ module.exports = {
 
         let query = "SELECT COUNT(@rid) as total, " + params.group_by.name + " \
             FROM message \
-            WHERE processed=true";
+            WHERE processed=true AND " + params.group_by.name + " <> ''";
 
         let tokens = _.groupBy(params.filter_by,'name');
         tokens = _.mapValues(tokens,(t)=>{
@@ -115,8 +124,13 @@ module.exports = {
         query += " GROUP BY " + params.group_by.name;
 
         let data = await Message.query(query);
-        data = _.omit(data,['@version','@type']);
-        return Message.removeCircularReferences(data);
+
+        Message.removeCircularReferences(data);
+        let newobj = {};
+        _.each(data,(d)=>{
+            newobj[d[params.group_by.name]] = d.total;
+        });
+        return newobj;
     },
 
     heuristicInMemory: async (params, message)=>{
