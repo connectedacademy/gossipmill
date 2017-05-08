@@ -34,9 +34,6 @@ module.exports = {
         //DEPTH IN THIS CASE MEANS ONLY n messages for each of the segments
 
         let lang = params.lang;
-        // console.log(params);
-
-        //TODO: group by and limit per segment:
 
         let tokens = _.groupBy(params.query,'name');
         tokens = _.mapValues(tokens,(t)=>{
@@ -54,10 +51,10 @@ module.exports = {
             query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
         }
 
-            query += " LIMIT "+params.depth;
-            query += " FETCHPLAN author:1 reply:1";
+        query += " LIMIT "+params.depth;
+        query += " FETCHPLAN author:1 reply:1";
 
-            // console.log(query);
+        // console.log(query);
         let data = await Message.query(query);
         data = _.map(data,(o)=>_.omit(o,['@version','@type']));
 
@@ -131,6 +128,50 @@ module.exports = {
             newobj[d[params.group_by.name]] = d.total;
         });
         return newobj;
+    },
+
+    heuristicSummary: async (params) =>{
+        let lang = params.lang;
+
+        let tokens = _.groupBy(params.query,'name');
+        tokens = _.mapValues(tokens,(t)=>{
+            return _.pluck(t,'query');
+        });
+
+        let query = "SELECT @rid,text,entities, message_id,service,"+_.keys(tokens).join(',')+", createdAt, lang, updatedAt, first(in('reply')) as reply, first(in('author')).exclude('_raw','out_author','credentials','app_credentials','user_from','remessageto') AS author \
+            FROM message ";
+
+        let where = "WHERE processed=true";
+
+        if (lang)
+            where+=" AND lang='"+lang+"'";
+
+        for (let token in tokens)
+        {
+            where+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
+        }
+
+        query += where;
+        query += " LIMIT 1";
+        query += " FETCHPLAN author:1 reply:1";
+
+        let data = Message.query(query);
+        let hashtags = Message.query("SELECT count(hashtags) as tags, hashtags as hashtag FROM (SELECT entities.hashtags.text as hashtags FROM message "+where+" UNWIND hashtags) GROUP BY hashtags ORDER BY tags DESC LIMIT 5");
+        let total = Message.query("SELECT count(@rid) as total FROM message " + where);
+        let contributors = Message.query("SELECT DISTINCT(user_from.id_str), first(in('author')).exclude('_raw','out_author','credentials','app_credentials','user_from','remessageto') AS author FROM message "+ where +" FETCHPLAN author:1");
+
+        let result = await Promise.all([data, hashtags, total, contributors]);
+        // console.log(result);
+
+        data = _.omit(_.first(result[0]),['@version','@type']);
+        return Message.removeCircularReferences({
+            info:{
+                hashtags: _.omit(result[1],['@version','@type']),
+                total:_.first(result[2]).total,
+                contributors: _.omit(_.first(result[3]),['@version','@type'])
+            },
+            message: data
+        });
     },
 
     heuristicInMemory: async (params, message)=>{

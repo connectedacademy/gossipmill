@@ -31,5 +31,6 @@ module.exports.routes = {
   'POST /messages/subscribe/:service/:user':'MessageController.subscribe',
   'POST /messages/list/:service/:user':'MessageController.list',
   'POST /messages/totals':'MessageController.totals',
-  'POST /messages/visualisation':'MessageController.visualisation'
+  'POST /messages/visualisation':'MessageController.visualisation',
+  'POST /messages/summary/:service/:user':'MessageController.summary'
 };

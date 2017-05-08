@@ -107,6 +107,60 @@ module.exports = {
         }
     },
 
+    summary: async (req,res) =>{
+
+        req.checkBody(filter_schema);
+        req.checkBody('lang').notEmpty();
+        req.checkParams('service').notEmpty();
+        req.checkParams('user').notEmpty();
+        req.checkBody('whitelist').notEmpty().isBoolean();
+
+        try
+        {
+            let result = await req.getValidationResult();
+            result.throw();
+        }
+        catch (e)
+        {
+            return res.badRequest(e.mapped());
+        }
+
+
+        let user_service = req.param('service'); //i.e. twitter
+        let user_account = req.param('user');// i.e. @tombartindale
+
+
+        let params = {
+            query: req.body.filter_by
+        }
+
+        params.account = user_account;
+        params.service = user_service;
+        params.whitelist = req.param('whitelist');
+
+        sails.log.verbose('Query messages', params);
+
+        try
+        {
+            let messages = await Message.heuristicSummary(params);
+            // console.log(messages);
+
+            params.query = _.groupBy(params.query,'name');
+            params.query = _.mapValues(params.query,(t)=>{
+                return _.pluck(t,'query');
+            });
+
+            return res.json({
+                scope: params,
+                data: messages
+            });
+        }
+        catch (e)
+        {
+            return res.serverError(e);
+        }
+    },
+
     list: async (req,res) => {
 
         req.checkBody('depth').isInt();
