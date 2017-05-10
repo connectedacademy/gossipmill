@@ -19,14 +19,15 @@ cache:
   - node_modules/
 
 test:
+  image: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
   stage: test
   script:
    - npm install
    - npm test
 
 stages:
-- test
 - build
+- test
 - release
 - deploy
 
@@ -37,7 +38,7 @@ variables:
 before_script:
   - docker login -u gitlab-ci-token -p "$CI_BUILD_TOKEN" $CI_REGISTRY
 
-build:
+container:
   stage: build
   tags:
     - local
@@ -45,7 +46,7 @@ build:
     - docker build -t $CONTAINER_TEST_IMAGE .
     - docker push $CONTAINER_TEST_IMAGE
 
-release-image:
+dockerhub:
   stage: release
   tags:
     - local
