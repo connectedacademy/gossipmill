@@ -46,11 +46,12 @@ let run = async() => {
         if (rand > 0.8)
         {
             newmessage.entities.urls.push({
-                expanded_url: "https://testclass.connectedacademy.io/submission/week1/intro"
+                expanded_url: "https://testclass.connectedacademy.io/submission/evidence/intro"
             });
             newmessage.entities.urls.push({
-                expanded_url: "https://demo.fourcorners.io"
+                expanded_url: "https://connectedacademy.io/test/4c1.html"
             });
+            newmessage.user_from.id_str = "17308978";
         }
 
         //insert `like`
@@ -112,6 +113,7 @@ let run = async() => {
         }
         else
         {
+            console.log(newmessage.user_from.id_str);
             let msg = JSON.stringify({ type: 'message', payload: newmessage });
             beanstalk.put(10, 0, 50000000, msg, function (err, jobid) {
                 if (err)
