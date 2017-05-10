@@ -21,6 +21,8 @@ cache:
 test:
   image: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
   stage: test
+  tags:
+    - local
   script:
    - npm install
    - npm test
