@@ -58,6 +58,17 @@ dockerhub:
   only:
     - master
 
+gitlab-repository:
+  stage: release
+  tags:
+    - local
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_RELEASE_IMAGE
+    - docker push $CONTAINER_RELEASE_IMAGE
+  only:
+    - master
+
 deploy-aws:
   stage: deploy
   environment: amazonlive
