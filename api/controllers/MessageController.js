@@ -61,22 +61,7 @@ module.exports = {
 
     subscribe: async (req,res)=>{
 
-        //TODO -- validation is not working on socker connections
-        // req.checkBody(filter_schema);
-        // req.checkBody('depth').isInt();
-        // req.checkParams('service').notEmpty();
-        // req.checkParams('user').notEmpty();
-        // req.checkBody('lang').notEmpty();
-
-        // try
-        // {
-        //     let result = await req.getValidationResult();
-        //     result.throw();
-        // }
-        // catch (e)
-        // {
-        //     return res.badRequest(e.mapped());
-        // }
+        //TODO: -- validation is not working on socker connections
 
         //initiate subscribe
 
