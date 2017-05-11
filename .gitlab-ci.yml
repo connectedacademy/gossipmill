@@ -1,6 +1,3 @@
-# This file is a template, and might need editing before it works on your project.
-# Official framework image. Look for the different tagged releases at:
-# https://hub.docker.com/r/library/node/tags/
 image: docker:git
 services:
   - docker:dind
@@ -18,19 +15,19 @@ cache:
   paths:
   - node_modules/
 
-test:
-  image: $CI_REGISTRY_IMAGE
-  stage: test
-  tags:
-    - local
-  script:
-   - npm test
-  only:
-   - master
+# test:
+#   tags:
+#     - local
+#   stage: test
+#   services:
+#     - redis:latest
+#   script:
+#     - docker pull $CONTAINER_TEST_IMAGE
+#     - docker run $CONTAINER_TEST_IMAGE npm test
 
 stages:
 - build
-- test
+# - test
 - release
 - deploy
 
@@ -42,15 +39,17 @@ variables:
 before_script:
   - docker login -u gitlab-ci-token -p "$CI_BUILD_TOKEN" $CI_REGISTRY
 
-container:
+build:
   stage: build
   tags:
     - local
   script:
     - docker build -t $CONTAINER_TEST_IMAGE .
     - docker push $CONTAINER_TEST_IMAGE
+  only:
+    - master
 
-gitlab:
+gitlab-repository:
   stage: release
   tags:
     - local
