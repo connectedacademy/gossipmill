@@ -117,7 +117,7 @@ module.exports = {
 
             //push this into the beanstalk queue:
             let m = JSON.stringify({type:'message',payload:newmessage});
-            beanstalk.put(10, 0, 50000000, m, function(err, jobid) {
+            beanstalk.put(10, 0, 50000000, m, function(err) {
                     // console.log(jobid);
                 if (err)
                     sails.log.error(err);
