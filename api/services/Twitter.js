@@ -112,7 +112,7 @@ module.exports = {
             }
 
             newmessage.entities = entities;
-            newmessage.user_from = thisuser['_raw'];
+            newmessage.user_from = _.omit(thisuser['_raw'],'@type');
             newmessage.lang = 'en';
 
             //push this into the beanstalk queue:
@@ -123,7 +123,7 @@ module.exports = {
                     sails.log.error(err);
             });
 
-            return newmessage;
+            return JSON.parse(JSON.stringify(newmessage));
         }
         else
         {

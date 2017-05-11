@@ -12,9 +12,11 @@
  */
 
 module.exports = {
+
+    schema: false,
     attributes:{
         toJSON:function() {
-            let obj = this.toObject();
+            let obj = Message.removeCircularReferences(this).toObject();
             return obj;
         }
     },

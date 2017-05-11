@@ -310,10 +310,18 @@ module.exports = {
             {
                 sails.log.verbose('Creating message',msg);
 
-                await Twitter.newmessage(credentials, msg);
-                return res.ok('Message Created');
-                // Message.create(newmessage).exec((err, message)=>{
-                //     return res.json(message);
+                let newmessage = await Twitter.newmessage(credentials, msg);
+
+                // Message.findOrCreate({message_id:newmessage.message_id},newmessage).exec((err, message)=>{
+                    // return res.ok('Message Created');
+                newmessage.user = {
+                    account_number: newmessage.user_from.id_str,
+                    service: newmessage.service,
+                    account: newmessage.user_from.screen_name,
+                    profile: newmessage.user_from.profile_image_url_https,
+                    name: newmessage.user_from.name
+                }
+                return res.json(_.omit(newmessage,'user_from'));
                 // });
             }
             else
