@@ -19,7 +19,7 @@ cache:
   - node_modules/
 
 test:
-  image: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
+  image: $CI_REGISTRY_IMAGE
   stage: test
   tags:
     - local

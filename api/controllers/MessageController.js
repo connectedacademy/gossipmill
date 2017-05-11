@@ -282,7 +282,7 @@ module.exports = {
         req.checkBody('credentials.key').notEmpty();
         req.checkBody('credentials.token').notEmpty();
         req.checkBody('credentials.tokenSecret').notEmpty();
-        req.checkBody('text').notEmpty().isLength({min:2,max:140});
+        req.checkBody('text').notEmpty().isLength({min:2});
         req.checkBody('replyto').optional().notEmpty();
         req.checkBody('remessageof').optional().notEmpty();
 
@@ -310,11 +310,11 @@ module.exports = {
             {
                 sails.log.verbose('Creating message',msg);
 
-                let newmessage = await Twitter.newmessage(credentials, msg);
-
-                Message.create(newmessage).exec((err, message)=>{
-                    return res.json(message);
-                });
+                await Twitter.newmessage(credentials, msg);
+                return res.ok('Message Created');
+                // Message.create(newmessage).exec((err, message)=>{
+                //     return res.json(message);
+                // });
             }
             else
             {
