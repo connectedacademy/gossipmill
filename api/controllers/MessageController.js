@@ -61,22 +61,7 @@ module.exports = {
 
     subscribe: async (req,res)=>{
 
-        //TODO -- validation is not working on socker connections
-        // req.checkBody(filter_schema);
-        // req.checkBody('depth').isInt();
-        // req.checkParams('service').notEmpty();
-        // req.checkParams('user').notEmpty();
-        // req.checkBody('lang').notEmpty();
-
-        // try
-        // {
-        //     let result = await req.getValidationResult();
-        //     result.throw();
-        // }
-        // catch (e)
-        // {
-        //     return res.badRequest(e.mapped());
-        // }
+        //TODO: -- validation is not working on socker connections
 
         //initiate subscribe
 
@@ -297,7 +282,7 @@ module.exports = {
         req.checkBody('credentials.key').notEmpty();
         req.checkBody('credentials.token').notEmpty();
         req.checkBody('credentials.tokenSecret').notEmpty();
-        req.checkBody('text').notEmpty().isLength({min:2,max:140});
+        req.checkBody('text').notEmpty().isLength({min:2});
         req.checkBody('replyto').optional().notEmpty();
         req.checkBody('remessageof').optional().notEmpty();
 
@@ -325,11 +310,11 @@ module.exports = {
             {
                 sails.log.verbose('Creating message',msg);
 
-                let newmessage = await Twitter.newmessage(credentials, msg);
-
-                Message.create(newmessage).exec((err, message)=>{
-                    return res.json(message);
-                });
+                await Twitter.newmessage(credentials, msg);
+                return res.ok('Message Created');
+                // Message.create(newmessage).exec((err, message)=>{
+                //     return res.json(message);
+                // });
             }
             else
             {
