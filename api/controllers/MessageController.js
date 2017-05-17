@@ -122,6 +122,7 @@ module.exports = {
         params.account = user_account;
         params.service = user_service;
         params.whitelist = req.param('whitelist');
+        params.lang = req.param('lang');
 
         sails.log.verbose('Query messages', params);
 

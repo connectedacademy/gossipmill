@@ -90,7 +90,7 @@ module.exports = {
 
         query += " GROUP BY " + grouper;
 
-        // console.log(query);
+        console.log(query);
         let data = await Message.query(query);
         // console.log(data);
 
@@ -145,6 +145,7 @@ module.exports = {
 
         let where = "WHERE processed=true";
 
+        // console.log(params);
         if (lang)
             where+=" AND lang='"+lang+"'";
 
@@ -160,6 +161,7 @@ module.exports = {
         let data = Message.query(query);
         let hashtags = Message.query("SELECT count(hashtags) as count, hashtags as hashtag FROM (SELECT entities.hashtags.text as hashtags FROM message "+where+" UNWIND hashtags) GROUP BY hashtags ORDER BY count DESC LIMIT 5");
         let total = Message.query("SELECT count(@rid) as total FROM message " + where);
+        // console.log("SELECT count(@rid) as total FROM message " + where);
         let contributors = Message.query("SELECT COUNT(user_from.id_str) as count, first(in('author')).exclude('_raw','out_author','credentials','account_credentials','user_from','remessageto') AS author FROM message "+ where +" GROUP BY user_from.id_str ORDER BY count DESC LIMIT 5 FETCHPLAN author:1 ");
         // console.log("SELECT DISTINCT(user_from.id_str), first(in('author')).exclude('_raw','out_author','credentials','account_credentials','user_from','remessageto') AS author FROM message "+ where +" FETCHPLAN author:1");
         let result = await Promise.all([data, hashtags, total, contributors]);
