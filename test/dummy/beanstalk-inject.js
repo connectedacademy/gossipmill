@@ -46,7 +46,7 @@ let run = async() => {
         if (rand > 0.8)
         {
             newmessage.entities.urls.push({
-                expanded_url: "https://testclass.connectedacademy.io/submission/evidence/intro"
+                expanded_url: "https://testclass.connectedacademy.io/#/submission/evidence/intro"
             });
             newmessage.entities.urls.push({
                 expanded_url: "https://connectedacademy.io/test/4c1.html"
@@ -62,7 +62,7 @@ let run = async() => {
             let content = _.sample(klass.content);
             if (content.slug)
                 newmessage.entities.urls.push({
-                    expanded_url: `https://testclass.connectedacademy.io/course/${klass.slug}/${content.slug}`
+                    expanded_url: `https://testclass.connectedacademy.io/#/course/${klass.slug}/${content.slug}`
                 });
         }
 
@@ -73,7 +73,7 @@ let run = async() => {
 
         if (content.slug)
             newmessage.entities.urls.push({
-                expanded_url: `https://testclass.connectedacademy.io/course/${klass.slug}/${content.slug}/${seconds}`
+                expanded_url: `https://testclass.connectedacademy.io/#/course/${klass.slug}/${content.slug}/${seconds}`
             });
 
         // newmessage.entities.hashtags = [

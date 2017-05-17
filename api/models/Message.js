@@ -42,7 +42,7 @@ module.exports = {
             return _.pluck(t,'query');
         });
 
-        let query = "SELECT @rid,text,entities, message_id,service,"+_.keys(tokens).join(',')+", createdAt, lang, updatedAt, first(in('reply')) as reply, first(in('author')).exclude('_raw','out_author','credentials','app_credentials','user_from','remessageto') AS author \
+        let query = "SELECT @rid,text,entities, message_id,service,"+_.keys(tokens).join(',')+", createdAt, lang, updatedAt, first(in('reply')) as reply, first(in('author')).exclude('_raw','out_author','credentials','account_credentials','user_from','remessageto') AS author \
             FROM message \
             WHERE processed=true";
         if (lang)
@@ -140,7 +140,7 @@ module.exports = {
             return _.pluck(t,'query');
         });
 
-        let query = "SELECT @rid,text,entities, message_id,service,"+_.keys(tokens).join(',')+", createdAt, lang, updatedAt, first(in('reply')) as reply, first(in('author')).exclude('_raw','out_author','credentials','app_credentials','user_from','remessageto') AS author \
+        let query = "SELECT @rid,text,entities, message_id,service,"+_.keys(tokens).join(',')+", createdAt, lang, updatedAt, first(in('reply')) as reply, first(in('author')).exclude('_raw','out_author','credentials','account_credentials','user_from','remessageto') AS author \
             FROM message ";
 
         let where = "WHERE processed=true";
@@ -158,19 +158,19 @@ module.exports = {
         query += " FETCHPLAN author:1 reply:1";
 
         let data = Message.query(query);
-        let hashtags = Message.query("SELECT count(hashtags) as tags, hashtags as hashtag FROM (SELECT entities.hashtags.text as hashtags FROM message "+where+" UNWIND hashtags) GROUP BY hashtags ORDER BY tags DESC LIMIT 5");
+        let hashtags = Message.query("SELECT count(hashtags) as count, hashtags as hashtag FROM (SELECT entities.hashtags.text as hashtags FROM message "+where+" UNWIND hashtags) GROUP BY hashtags ORDER BY count DESC LIMIT 5");
         let total = Message.query("SELECT count(@rid) as total FROM message " + where);
-        let contributors = Message.query("SELECT DISTINCT(user_from.id_str), first(in('author')).exclude('_raw','out_author','credentials','app_credentials','user_from','remessageto') AS author FROM message "+ where +" FETCHPLAN author:1");
-
+        let contributors = Message.query("SELECT DISTINCT(user_from.id_str), first(in('author')).exclude('_raw','out_author','credentials','account_credentials','user_from','remessageto') AS author FROM message "+ where +" FETCHPLAN author:1");
+        // console.log("SELECT DISTINCT(user_from.id_str), first(in('author')).exclude('_raw','out_author','credentials','account_credentials','user_from','remessageto') AS author FROM message "+ where +" FETCHPLAN author:1");
         let result = await Promise.all([data, hashtags, total, contributors]);
         // console.log(result);
 
         data = _.omit(_.first(result[0]),['@version','@type']);
         return Message.removeCircularReferences({
             info:{
-                hashtags: _.omit(result[1],['@version','@type']),
+                hashtags: _.map(result[1],(f)=>_.omit(f,['@version','@type'])),
                 total:_.first(result[2]).total,
-                contributors: _.omit(_.first(result[3]),['@version','@type'])
+                contributors: _.map(result[3],(f)=>_.omit(f.author,['@version','@type','@class']))
             },
             message: data
         });

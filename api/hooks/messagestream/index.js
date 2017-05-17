@@ -12,7 +12,7 @@ module.exports = function(sails)
                     sails.log.info('Subscribed to messages channel on Redis');
                 });
 
-                redis.on('message', function (channel, message) {
+                redis.on('message', async function (channel, message) {
                     // let msg = JSON.parse(message);
                     sails.log.verbose('PubSub Message',message);
                     processMessage('UPDATE',message);
@@ -24,7 +24,7 @@ module.exports = function(sails)
     }
 }
 
-var processMessage = function(operation, message)
+var processMessage = async function(operation, message)
 {
     //for each rule in settings
     sails.log.verbose("Process Message",operation,message.id);
@@ -38,7 +38,7 @@ var processMessage = function(operation, message)
     if (operation == 'UPDATE')
     {
         // Should not need to do anything here
-        SubscriptionManager.processNewMessageForSubscribers(message);
+        await SubscriptionManager.processNewMessageForSubscribers(message);
     }
     return;
 }
