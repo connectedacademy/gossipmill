@@ -59,6 +59,23 @@ module.exports = {
         }
     },
 
+    unsubscribe: async (req,res)=>{
+
+        sails.log.verbose('Unsubscribe from '+ req.body.socketid);
+
+        try
+        {
+            await SubscriptionManager.unsubscribe(req.body.socketid);
+            return res.json({
+                msg:'Unsubscribed'
+            });
+        }
+        catch (e)
+        {
+            return res.serverError(e);
+        }
+    },
+
     subscribe: async (req,res)=>{
 
         //TODO: -- validation is not working on socker connections

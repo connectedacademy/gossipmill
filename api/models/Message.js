@@ -23,11 +23,6 @@ module.exports = {
 
     //TODO: Bubble up the 'most interesting thing' in the segment query
 
-    //TODO: Send back summary information (like most used hashtags, users, number of tweets etc)
-
-
-
-
     // query with a given criteria statically
     heuristicQuery: async (params)=>{
 
@@ -201,6 +196,10 @@ module.exports = {
 
     heuristicInMemory: async (params, message)=>{
         //TODO: perform some of the above logic to determine if this message should be passed to the subscriber
+
+        //in range etc
+
+
         return message;
     }
 }

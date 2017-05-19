@@ -19,15 +19,13 @@ module.exports = {
         return roomname;
     },
 
-    // // unsubscribe for a given query
-    // unsubscribe: async (req)=>{
-    //     let roomname = 'query-'+req.session.id;
-    //     delete queryStore[roomname];
-    //     sails.sockets.leave(roomname);
-    //     sails.log.verbose('Leaving room', roomname);
-    //     return;
-    // },
-
+    unsubscribe: async(socketid)=>{
+        let roomname = 'query-'+socketid;
+        delete queryStore[roomname];
+        sails.sockets.leave(roomname,()=>{
+            sails.log.verbose('Left room',roomname);
+        });
+    },
 
     // process a live incoming message for all known subscribers
     processNewMessageForSubscribers: async (msg)=>{
@@ -44,7 +42,7 @@ module.exports = {
             if (Message.heuristicInMemory(query, message))
             {
                 sails.sockets.broadcast(q, q, message);
-                sails.log.verbose('Message sent to', message.message_id, query);
+                sails.log.verbose('Message sent to', message.message_id, q);
             }
             else
             {
