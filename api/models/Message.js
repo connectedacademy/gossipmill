@@ -50,7 +50,11 @@ module.exports = {
 
         for (let token in tokens)
         {
-            query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
+            if (_.size(tokens[token])==1)
+                query+=" AND "+token+" = '" + _.first(tokens[token]) + "'";
+            else
+                query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
+            // query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
         }
 
         query += " LIMIT "+params.depth;
@@ -85,7 +89,11 @@ module.exports = {
 
         for (let token in tokens)
         {
-            query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
+            if (_.size(tokens[token])==1)
+                query+=" AND "+token+" = '" + _.first(tokens[token]) + "'";
+            else
+                query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
+            // query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
         }
 
         query += " GROUP BY " + grouper;
@@ -119,7 +127,10 @@ module.exports = {
 
         for (let token in tokens)
         {
-            query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
+             if (_.size(tokens[token])==1)
+                query+=" AND "+token+" = '" + _.first(tokens[token]) + "'";
+            else
+                query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
         }
 
         query += " GROUP BY " + params.group_by.name;
@@ -155,12 +166,17 @@ module.exports = {
 
         for (let token in tokens)
         {
-            where+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
+            if (_.size(tokens[token])==1)
+                where+=" AND "+token+" = '" + _.first(tokens[token]) + "'";
+            else
+                where+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
         }
 
         query += where;
         query += " LIMIT 1";
         query += " FETCHPLAN author:1 reply:1";
+
+        // console.log(query);
 
         let data = Message.query(query);
         let hashtags = Message.query("SELECT count(hashtags) as count, hashtags as hashtag FROM (SELECT entities.hashtags.text as hashtags FROM message "+where+" UNWIND hashtags) GROUP BY hashtags ORDER BY count DESC LIMIT 5");
