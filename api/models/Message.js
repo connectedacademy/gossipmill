@@ -31,8 +31,6 @@ module.exports = {
 
         //TODO: implement query logic to query heuristics for this set of parameters
 
-        //DEPTH IN THIS CASE MEANS ONLY n messages for each of the segments
-
         let lang = params.lang;
 
         let tokens = _.groupBy(params.query,'name');
@@ -197,14 +195,24 @@ module.exports = {
         });
     },
 
-    heuristicInMemory: async (params, message)=>{
-        //TODO: perform some of the above logic to determine if this message should be passed to the subscriber
+    heuristicInMemory: (params, message)=>{
 
         //in range etc
         if (message.service != params.service)
             return false;
         if (message.lang != params.lang)
             return false;
+
+        let tokens = _.groupBy(params.filter_by,'name');
+        tokens = _.mapValues(tokens,(t)=>{
+            return _.pluck(t,'query');
+        });
+
+        for (let token in tokens)
+        {
+            if (!_.contains(tokens[token],message[token]))
+                return false;
+        }
 
         return true;
     }
