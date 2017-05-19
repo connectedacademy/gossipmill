@@ -15,6 +15,9 @@ module.exports = {
 
     schema: false,
     attributes:{
+        user:{
+            model:'user'
+        },
         toJSON:function() {
             let obj = Message.removeCircularReferences(this).toObject();
             return obj;
@@ -95,7 +98,7 @@ module.exports = {
         query += " ORDER BY " + grouper + " ASC";
 
 
-        console.log(query);
+        // console.log(query);
         let data = await Message.query(query);
         // console.log(data);
 
@@ -198,8 +201,11 @@ module.exports = {
         //TODO: perform some of the above logic to determine if this message should be passed to the subscriber
 
         //in range etc
+        if (message.service != params.service)
+            return false;
+        if (message.lang != params.lang)
+            return false;
 
-
-        return message;
+        return true;
     }
 }

@@ -1,5 +1,4 @@
 let queryStore = {};
-let uuid = require('uuid');
 
 module.exports = {
 
@@ -31,7 +30,7 @@ module.exports = {
     processNewMessageForSubscribers: async (msg)=>{
         sails.log.verbose('Publishing message to pending subscriptions', msg.message_id);
 
-        let message = await Message.findOne({message_id:msg});
+        let message = await Message.findOne({message_id:msg}).populate('user');
         Message.removeCircularReferences(message);
 
         for (let q in queryStore)
@@ -41,7 +40,8 @@ module.exports = {
 
             if (Message.heuristicInMemory(query, message))
             {
-                sails.sockets.broadcast(q, q, message);
+                message.user = _.omit(message.user,'rid','credentials','account_credentials','_raw');
+                sails.sockets.broadcast(q, q, _.omit(message,'rid','_raw','user_from'));
                 sails.log.verbose('Message sent to', message.message_id, q);
             }
             else
