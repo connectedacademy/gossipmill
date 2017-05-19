@@ -42,7 +42,7 @@ module.exports = {
             return _.pluck(t,'query');
         });
 
-        let query = "SELECT @rid,text,entities, message_id,service,"+_.keys(tokens).join(',')+", createdAt, lang, updatedAt, first(in('reply')) as reply, first(in('author')).exclude('_raw','out_author','credentials','account_credentials','user_from','remessageto') AS author \
+        let query = "SELECT @rid,text,entities, message_id,service,"+_.keys(tokens).join(',')+", createdAt, lang, updatedAt, first(in('reply')) as reply, user.exclude('_raw','credentials','account_credentials') AS author \
             FROM message \
             WHERE processed=true";
         if (lang)
@@ -89,6 +89,8 @@ module.exports = {
         }
 
         query += " GROUP BY " + grouper;
+        query += " ORDER BY " + grouper + " ASC";
+
 
         console.log(query);
         let data = await Message.query(query);
@@ -121,6 +123,8 @@ module.exports = {
         }
 
         query += " GROUP BY " + params.group_by.name;
+        // query += " ORDER BY " + params.group_by.name + " ASC";
+        // console.log(query);
 
         let data = await Message.query(query);
 
@@ -140,7 +144,7 @@ module.exports = {
             return _.pluck(t,'query');
         });
 
-        let query = "SELECT @rid,text,entities, message_id,service,"+_.keys(tokens).join(',')+", createdAt, lang, updatedAt, first(in('reply')) as reply, first(in('author')).exclude('_raw','out_author','credentials','account_credentials','user_from','remessageto') AS author \
+        let query = "SELECT @rid,text,entities, message_id,service,"+_.keys(tokens).join(',')+", createdAt, lang, updatedAt, first(in('reply')) as reply, user.exclude('_raw','credentials','account_credentials') AS author \
             FROM message ";
 
         let where = "WHERE processed=true";
@@ -161,9 +165,7 @@ module.exports = {
         let data = Message.query(query);
         let hashtags = Message.query("SELECT count(hashtags) as count, hashtags as hashtag FROM (SELECT entities.hashtags.text as hashtags FROM message "+where+" UNWIND hashtags) GROUP BY hashtags ORDER BY count DESC LIMIT 5");
         let total = Message.query("SELECT count(@rid) as total FROM message " + where);
-        // console.log("SELECT count (@rid) as total FROM message " + where);
-        let contributors = Message.query("SELECT COUNT(user_from.id_str) as count, first(in('author')).exclude('_raw','out_author','credentials','account_credentials','user_from','remessageto') AS author FROM message "+ where +" GROUP BY user_from.id_str ORDER BY count DESC LIMIT 5 FETCHPLAN author:1 ");
-        // console.log("SELECT DISTINCT(user_from.id_str), first(in('author')).exclude('_raw','out_author','credentials','account_credentials','user_from','remessageto') AS author FROM message "+ where +" FETCHPLAN author:1");
+        let contributors = Message.query("SELECT COUNT(user_from.id_str) as count, user.exclude('_raw','credentials','account_credentials') AS author FROM message "+ where +" GROUP BY user_from.id_str ORDER BY count DESC LIMIT 5 FETCHPLAN author:1 ");
         let result = await Promise.all([data, hashtags, total, contributors]);
         // console.log(result);
 
