@@ -192,7 +192,8 @@ module.exports = {
 
         let params = {
             depth: depth,
-            query: req.body.filter_by
+            query: req.body.filter_by,
+            lang: req.body.lang
         }
 
         params.account = user_account;

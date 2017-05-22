@@ -38,11 +38,15 @@ module.exports = {
             return _.pluck(t,'query');
         });
 
-        let query = "SELECT @rid,text,entities, message_id,service,"+_.keys(tokens).join(',')+", createdAt, lang, updatedAt, first(in('reply')) as reply, user.exclude('_raw','credentials','account_credentials') AS author \
+        let query = "SELECT @rid, text, entities, message_id,service, "+_.keys(tokens).join(',')+", createdAt, lang, updatedAt, first(in('reply')) as reply, user.exclude('_raw','credentials','account_credentials') AS author \
             FROM message \
             WHERE processed=true";
         if (lang)
-            query+=" AND lang='"+lang+"'";
+            query+=" AND lang=:lang";
+
+        let safe_params = {
+            lang: lang
+        };
 
         for (let token in tokens)
         {
@@ -50,14 +54,16 @@ module.exports = {
                 query+=" AND "+token+" = '" + _.first(tokens[token]) + "'";
             else
                 query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
-            // query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
         }
 
         query += " LIMIT "+params.depth;
         query += " FETCHPLAN author:1 reply:1";
 
         // console.log(query);
-        let data = await Message.query(query);
+        let data = await Message.query(query,
+        {
+            params: safe_params
+        });
         data = _.map(data,(o)=>_.omit(o,['@version','@type']));
 
         return Message.removeCircularReferences(data);
@@ -76,12 +82,16 @@ module.exports = {
             FROM message \
             WHERE processed=true";
         if (lang)
-            query+=" AND lang='"+lang+"'";
+            query+=" AND lang=:lang";
 
         let tokens = _.groupBy(params.filter_by,'name');
         tokens = _.mapValues(tokens,(t)=>{
             return _.pluck(t,'query');
         });
+
+        let safe_params = {
+            lang: lang
+        };
 
         for (let token in tokens)
         {
@@ -97,7 +107,10 @@ module.exports = {
 
 
         // console.log(query);
-        let data = await Message.query(query);
+        let data = await Message.query(query,
+        {
+            params: safe_params
+        });
         // console.log(data);
 
         data = _.map(data,(o)=>_.omit(o,['@version','@type']));
@@ -158,7 +171,11 @@ module.exports = {
 
         // console.log(params);
         if (lang)
-            where+=" AND lang='"+lang+"'";
+            where+=" AND lang=:lang";
+
+        let safe_params = {
+            lang: lang
+        };
 
         for (let token in tokens)
         {
@@ -172,9 +189,10 @@ module.exports = {
         query += " LIMIT 1";
         query += " FETCHPLAN author:1 reply:1";
 
-        // console.log(query);
-
-        let data = Message.query(query);
+        let data = Message.query(query,
+        {
+            params: safe_params
+        });
         let hashtags = Message.query("SELECT count(hashtags) as count, hashtags as hashtag FROM (SELECT entities.hashtags.text as hashtags FROM message "+where+" UNWIND hashtags) GROUP BY hashtags ORDER BY count DESC LIMIT 5");
         let total = Message.query("SELECT count(@rid) as total FROM message " + where);
         let contributors = Message.query("SELECT COUNT(user_from.id_str) as count, user.exclude('_raw','credentials','account_credentials') AS author FROM message "+ where +" GROUP BY user_from.id_str ORDER BY count DESC LIMIT 5 FETCHPLAN author:1 ");
