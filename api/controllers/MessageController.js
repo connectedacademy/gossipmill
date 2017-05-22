@@ -78,10 +78,6 @@ module.exports = {
 
     subscribe: async (req,res)=>{
 
-        //TODO: -- validation is not working on socker connections
-
-        //initiate subscribe
-
         //when new messages come in, needs to run the subscribe filter and send to the right people
 
         let user_service = req.param('service'); //i.e. twitter
@@ -303,7 +299,6 @@ module.exports = {
         req.checkBody('credentials.tokenSecret').notEmpty();
         req.checkBody('text').notEmpty().isLength({min:2});
         req.checkBody('replyto').optional().notEmpty();
-        req.checkBody('remessageof').optional().notEmpty();
 
         try
         {

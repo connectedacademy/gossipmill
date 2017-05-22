@@ -41,8 +41,11 @@ module.exports = {
         let query = "SELECT @rid, text, entities, message_id,service, " + _.keys(tokens).join(',') + ", createdAt, lang, updatedAt, first(in('reply')) as reply, user.exclude('_raw','credentials','account_credentials') AS author \
             FROM message \
             WHERE processed=true";
+
         if (lang)
+        {
             query += " AND lang=:lang";
+        }
 
         let safe_params = {
             lang: lang
@@ -167,8 +170,9 @@ module.exports = {
             return _.pluck(t, 'query');
         });
 
-        let query = "SELECT @rid,text,entities, message_id,service," + _.keys(tokens).join(',') + ", createdAt, lang, updatedAt, first(in('reply')) as reply, user.exclude('_raw','credentials','account_credentials') AS author \
-            FROM message ";
+        let query = "SELECT FROM (SELECT $ismine as ismine, @rid,text,entities, message_id,service," + _.keys(tokens).join(',') + ", createdAt, lang, updatedAt, first(in('reply')) as reply, user.exclude('_raw','credentials','account_credentials') AS author \
+            FROM message \
+            LET $ismine = if(eval(\"user.account=='"+params.account+"' AND user.service=='"+params.service+"'\"),1,0)";
 
         let where = "WHERE processed=true";
 
@@ -177,7 +181,9 @@ module.exports = {
             where += " AND lang=:lang";
 
         let safe_params = {
-            lang: lang
+            lang: lang,
+            account: params.account,
+            service: params.service
         };
 
         for (let token in tokens) {
@@ -190,8 +196,11 @@ module.exports = {
         }
 
         query += where;
+        query += ") ORDER BY ismine DESC";
         query += " LIMIT 1";
         query += " FETCHPLAN author:1 reply:1";
+
+        // console.log(query);
 
         let data = Message.query(query,
             {
