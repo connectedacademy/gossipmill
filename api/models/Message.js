@@ -180,9 +180,13 @@ module.exports = {
         for (let token in tokens)
         {
             if (_.size(tokens[token])==1)
+            {
                 where+=" AND "+token+" = '" + _.first(tokens[token]) + "'";
+            }
             else
+            {
                 where+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
+            }
         }
 
         query += where;
@@ -193,9 +197,18 @@ module.exports = {
         {
             params: safe_params
         });
-        let hashtags = Message.query("SELECT count(hashtags) as count, hashtags as hashtag FROM (SELECT entities.hashtags.text as hashtags FROM message "+where+" UNWIND hashtags) GROUP BY hashtags ORDER BY count DESC LIMIT 5");
-        let total = Message.query("SELECT count(@rid) as total FROM message " + where);
-        let contributors = Message.query("SELECT COUNT(user_from.id_str) as count, user.exclude('_raw','credentials','account_credentials') AS author FROM message "+ where +" GROUP BY user_from.id_str ORDER BY count DESC LIMIT 5 FETCHPLAN author:1 ");
+        let hashtags = Message.query("SELECT count(hashtags) as count, hashtags as hashtag FROM (SELECT entities.hashtags.text as hashtags FROM message "+where+" UNWIND hashtags) GROUP BY hashtags ORDER BY count DESC LIMIT 5",,
+        {
+            params: safe_params
+        });
+        let total = Message.query("SELECT count(@rid) as total FROM message " + where,
+        {
+            params: safe_params
+        });
+        let contributors = Message.query("SELECT COUNT(user_from.id_str) as count, user.exclude('_raw','credentials','account_credentials') AS author FROM message "+ where +" GROUP BY user_from.id_str ORDER BY count DESC LIMIT 5 FETCHPLAN author:1 ",,
+        {
+            params: safe_params
+        });
         let result = await Promise.all([data, hashtags, total, contributors]);
         // console.log(result);
 
