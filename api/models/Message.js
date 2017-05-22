@@ -24,12 +24,11 @@ module.exports = {
         }
     },
 
-    //TODO: Bubble up the 'most interesting thing' in the segment query
 
     // query with a given criteria statically
     heuristicQuery: async (params) => {
 
-        //TODO: implement query logic to query heuristics for this set of parameters
+        //TODO: threaded view:
 
         let lang = params.lang;
 
@@ -63,7 +62,7 @@ module.exports = {
         query += " LIMIT " + params.depth;
         query += " FETCHPLAN author:1 reply:1";
 
-        // console.log(query);
+        console.log(query);
         let data = await Message.query(query,
             {
                 params: safe_params
@@ -84,7 +83,8 @@ module.exports = {
 
         let query = "SELECT count(*), " + grouper + " \
             FROM message \
-            WHERE processed=true";
+            WHERE processed=true \
+            AND "+grouper+" IS NOT null";
         if (lang)
             query += " AND lang=:lang";
 
@@ -104,19 +104,17 @@ module.exports = {
             else {
                 query += " AND " + token + " IN [" + _.map(tokens[token], (v) => "'" + v + "'").join(',') + "]";
             }
-            // query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
         }
 
         query += " GROUP BY " + grouper;
         query += " ORDER BY " + grouper + " ASC";
 
-
-        // console.log(query);
         let data = await Message.query(query,
             {
                 params: safe_params
             });
-        // console.log(data);
+
+            // console.log(query);
 
         data = _.map(data, (o) => _.omit(o, ['@version', '@type']));
         return Message.removeCircularReferences(data);
@@ -162,6 +160,8 @@ module.exports = {
         return newobj;
     },
 
+
+    //TODO: Bubble up the 'most interesting thing' in the segment query
     heuristicSummary: async (params) => {
         let lang = params.lang;
 
@@ -176,7 +176,6 @@ module.exports = {
 
         let where = "WHERE processed=true";
 
-        // console.log(params);
         if (lang)
             where += " AND lang=:lang";
 
@@ -200,8 +199,6 @@ module.exports = {
         query += " LIMIT 1";
         query += " FETCHPLAN author:1 reply:1";
 
-        // console.log(query);
-
         let data = Message.query(query,
             {
                 params: safe_params
@@ -219,7 +216,6 @@ module.exports = {
                 params: safe_params
             });
         let result = await Promise.all([data, hashtags, total, contributors]);
-        // console.log(result);
 
         data = _.omit(_.first(result[0]), ['@version', '@type']);
         return Message.removeCircularReferences({
