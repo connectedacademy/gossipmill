@@ -75,7 +75,7 @@ let run = async() => {
         //give a mix of whether it is a message that relates to a particular place in the course:
         let klass = _.sample(testspec.classes);
         let content = _.sample(klass.content);
-        let seconds = Math.round(Math.random() * 6000);
+        let seconds = Math.round(Math.random() * 1800);
 
         if (content.slug)
             newmessage.entities.urls.push({
