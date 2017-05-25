@@ -59,6 +59,7 @@ module.exports = {
             }
         }
 
+        query += " ORDER BY createdAt DESC";
         query += " LIMIT " + params.depth;
         query += " FETCHPLAN author:1 reply:1";
 
