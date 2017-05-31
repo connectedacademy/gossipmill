@@ -33,13 +33,6 @@ module.exports = {
     /**
      * Done
      */
-    tokens: (req,res)=>{
-        return res.json(sails.tokens);
-    },
-
-    /**
-     * Done
-     */
     services: async (req,res)=>{
         try
         {

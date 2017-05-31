@@ -22,9 +22,6 @@
 
 module.exports.routes = {
   '/': 'MessageController.root',
-
-  'GET /tokens':'MessageController.tokens',
-
   'GET /services':'MessageController.services',
 
   'POST /messages/create':'MessageController.create',
