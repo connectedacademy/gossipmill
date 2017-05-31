@@ -18,7 +18,8 @@ if (!process.env.CI && process.env.NODE_ENV=='production')
   customLogger.add(winstonAwsCloudWatch, {
     logGroupName: 'ConnectedAcademyAPI',
     logStreamName:'gossipmill-'+ os.hostname(),
-    awsRegion: process.env.AWS_DEFAULT_REGION
+    awsRegion: process.env.AWS_DEFAULT_REGION,
+    jsonMessage: true
   });
 }
 
