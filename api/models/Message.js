@@ -11,6 +11,8 @@
  *
  */
 
+let omitDeep = require('omit-deep-lodash');
+
 module.exports = {
 
     schema: false,
@@ -24,54 +26,102 @@ module.exports = {
         }
     },
 
+    heuristicQuery: async (params)=>{
 
-    // query with a given criteria statically
-    heuristicQuery: async (params) => {
-
-        //TODO: threaded view:
+        //TODO: implement query logic to query heuristics for this set of parameters
 
         let lang = params.lang;
 
-        let tokens = _.groupBy(params.query, 'name');
-        tokens = _.mapValues(tokens, (t) => {
-            return _.pluck(t, 'query');
+        let tokens = _.groupBy(params.query,'name');
+        tokens = _.mapValues(tokens,(t)=>{
+            return _.pluck(t,'query');
         });
 
-        let query = "SELECT @rid, text, entities, message_id,service, " + _.keys(tokens).join(',') + ", createdAt, lang, updatedAt, first(in('reply')) as reply, user.exclude('_raw','credentials','account_credentials') AS author \
+        let query = "SELECT @rid, text, entities, message_id,service, "+_.keys(tokens).join(',')+", createdAt, lang, updatedAt, first(in('reply')) as reply, user.exclude('_raw','credentials','account_credentials') AS author \
             FROM message \
             WHERE processed=true";
-
         if (lang)
-        {
-            query += " AND lang=:lang";
-        }
+            query+=" AND lang=:lang";
 
         let safe_params = {
             lang: lang
         };
 
-        for (let token in tokens) {
-            if (_.size(tokens[token]) == 1) {
-                query += " AND " + token + " = '" + _.first(tokens[token]) + "'";
-            }
-            else {
-                query += " AND " + token + " IN [" + _.map(tokens[token], (v) => "'" + v + "'").join(',') + "]";
-            }
+        for (let token in tokens)
+        {
+            if (_.size(tokens[token])==1)
+                query+=" AND "+token+" = '" + _.first(tokens[token]) + "'";
+            else
+                query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
         }
 
-        query += " ORDER BY createdAt DESC";
-        query += " LIMIT " + params.depth;
+        query += " LIMIT "+params.depth;
         query += " FETCHPLAN author:1 reply:1";
 
-        console.log(query);
+        // console.log(query);
         let data = await Message.query(query,
-            {
-                params: safe_params
-            });
-        data = _.map(data, (o) => _.omit(o, ['@version', '@type']));
+        {
+            params: safe_params
+        });
+        data = _.map(data,(o)=>_.omit(o,['@version','@type']));
 
         return Message.removeCircularReferences(data);
     },
+
+    // query with a given criteria statically
+    // heuristicQuery: async (params) => {
+
+    //     //TODO: threaded view:
+
+    //     let lang = params.lang;
+
+    //     let tokens = _.groupBy(params.query, 'name');
+    //     tokens = _.mapValues(tokens, (t) => {
+    //         return _.pluck(t, 'query');
+    //     });
+
+    //     //select text, $replies from message LET $replies = (SELECT FROM (traverse in('reply') FROM $current) WHERE $depth >= 1) where segment=1 AND replyto is null
+
+    //     let query = "SELECT @rid.asString(), text, in('reply').exclude('replyto','_raw','user_from','out_reply') as replies, entities, message_id,service, " + _.keys(tokens).join(',') + ", createdAt, lang, updatedAt, user.exclude('_raw','credentials','account_credentials') AS author \
+    //         FROM message \
+    //         WHERE processed=true \
+    //         AND replyto is null";
+
+    //     if (lang)
+    //     {
+    //         query += " AND lang=:lang";
+    //     }
+
+    //     let safe_params = {
+    //         lang: lang
+    //     };
+
+    //     for (let token in tokens) {
+    //         if (_.size(tokens[token]) == 1) {
+    //             query += " AND " + token + " = '" + _.first(tokens[token]) + "'";
+    //         }
+    //         else {
+    //             query += " AND " + token + " IN [" + _.map(tokens[token], (v) => "'" + v + "'").join(',') + "]";
+    //         }
+    //     }
+
+    //     query += " ORDER BY createdAt DESC";
+    //     query += " LIMIT " + params.depth;
+    //     query += " FETCHPLAN author:1 replies:1 [*]in_reply:-1 *:-1 user:-1 ";
+
+    //     // console.log(query);
+    //     let data = await Message.query(query,
+    //         {
+    //             params: safe_params
+    //         });
+
+    //     Message.removeCircularReferences(data);
+    //     // console.log(data);
+
+    //     // data = omitDeep(data,['@version','@type','_raw','@class','credentials','account_credentials']);
+
+    //     return data;
+    // },
 
     /**
      * For visualisation / linear timeline of data
@@ -171,9 +221,9 @@ module.exports = {
             return _.pluck(t, 'query');
         });
 
-        let query = "SELECT FROM (SELECT $ismine as ismine, @rid,text,entities, message_id,service," + _.keys(tokens).join(',') + ", createdAt, lang, updatedAt, first(in('reply')) as reply, user.exclude('_raw','credentials','account_credentials') AS author \
+        let query = "SELECT FROM (SELECT $ismine as ismine, @rid,text,entities, message_id,service," + _.keys(tokens).join(',') + ", createdAt, lang, updatedAt, user.exclude('_raw','credentials','account_credentials') AS author \
             FROM message \
-            LET $ismine = if(eval(\"user.account=='"+params.account+"' AND user.service=='"+params.service+"'\"),1,0)";
+            LET $ismine = if(eval(\"user.account='"+params.account+"' AND user.service='"+params.service+"'\"),1,0)";
 
         let where = "WHERE processed=true";
 
@@ -198,7 +248,7 @@ module.exports = {
         query += where;
         query += ") ORDER BY ismine DESC";
         query += " LIMIT 1";
-        query += " FETCHPLAN author:1 reply:1";
+        query += " FETCHPLAN author:1";
 
         let data = Message.query(query,
             {
@@ -219,6 +269,7 @@ module.exports = {
         let result = await Promise.all([data, hashtags, total, contributors]);
 
         data = _.omit(_.first(result[0]), ['@version', '@type']);
+
         return Message.removeCircularReferences({
             info: {
                 hashtags: _.map(result[1], (f) => _.omit(f, ['@version', '@type'])),
