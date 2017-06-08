@@ -28,6 +28,21 @@ let applyUsers = function(data,users)
     }
 }
 
+let removeEdges = function(messages)
+{
+    for(let message of messages)
+    {
+        if (_.isObject(message))
+        {
+            message.in_reply = _.map(message.in_reply,(m)=>{
+                return m.out;
+            });
+
+            removeEdges(message.in_reply);
+        }
+    }
+}
+
 let recurseUser = function(obj)
 {
     let result = [];
@@ -39,7 +54,6 @@ let recurseUser = function(obj)
             if (!_.isObject(o.user) && !_.isEmpty(o.user))
             {
                 result.push(o.user);
-                console.log(o.user);
             }
 
             result = result.concat(recurseUser(_.without(_.pluck(o.in_reply,'out'),null)));
@@ -71,9 +85,7 @@ module.exports = {
             return _.pluck(t, 'query');
         });
 
-        //select text, $replies from message LET $replies = (SELECT FROM (traverse in('reply') FROM $current) WHERE $depth >= 1) where segment=1 AND replyto is null
-
-        let query = "SELECT @rid.asString(), text, inE('reply') as in_reply, entities, message_id,service, " + _.keys(tokens).join(',') + ", createdAt, lang, updatedAt \
+        let query = "SELECT @rid.asString(), text, list(inE('reply')) as in_reply, entities, message_id,service, " + _.keys(tokens).join(',') + ", createdAt, lang, updatedAt \
             FROM message \
             WHERE processed=true \
             AND replyto is null";
@@ -98,9 +110,7 @@ module.exports = {
 
         query += " ORDER BY createdAt DESC";
         query += " LIMIT " + params.depth;
-        query += " FETCHPLAN [*]in_*:-1";
-
-        // console.log(query);
+        query += " FETCHPLAN *:-1 [*]user:-2 [*]out_reply:-2 [*]in:-2";
 
         let data = await Message.query(query,
             {
@@ -110,13 +120,12 @@ module.exports = {
         Message.removeCircularReferences(data);
 
         let userlist = _.uniq(recurseUser(data));
-        // console.log(userlist);
         let users = await User.query('SELECT @rid.asString() as id, account, service, account_number, name, profile, link FROM ['+userlist.join(',')+']');
-
-        // console.log(users);
         applyUsers(data,users);
+        removeEdges(data);
 
         data = omitDeep(data,['@version','@type','_raw','@class','credentials','account_credentials','replyto','user_from','out_reply','in','replytolink']);
+
 
         return data;
     },
