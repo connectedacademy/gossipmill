@@ -13,6 +13,41 @@
 
 let omitDeep = require('omit-deep-lodash');
 
+let applyUsers = function(data,users)
+{
+    for (let o of data)
+    {
+        if (_.isObject(o))
+        {
+            if (!_.isObject(o.user) && !_.isEmpty(o.user))
+            {
+                o.user = _.find(users,{'id':o.user});
+            }
+            applyUsers(_.without(_.pluck(o.in_reply,'out'),null),users);
+        }
+    }
+}
+
+let recurseUser = function(obj)
+{
+    let result = [];
+
+    for (let o of obj)
+    {
+        if (_.isObject(o))
+        {
+            if (!_.isObject(o.user) && !_.isEmpty(o.user))
+            {
+                result.push(o.user);
+                console.log(o.user);
+            }
+
+            result = result.concat(recurseUser(_.without(_.pluck(o.in_reply,'out'),null)));
+        }
+    }
+    return result;
+}
+
 module.exports = {
 
     schema: false,
@@ -26,102 +61,65 @@ module.exports = {
         }
     },
 
-    heuristicQuery: async (params)=>{
-
-        //TODO: implement query logic to query heuristics for this set of parameters
+    // query with a given criteria statically
+    heuristicQuery: async (params) => {
 
         let lang = params.lang;
 
-        let tokens = _.groupBy(params.query,'name');
-        tokens = _.mapValues(tokens,(t)=>{
-            return _.pluck(t,'query');
+        let tokens = _.groupBy(params.query, 'name');
+        tokens = _.mapValues(tokens, (t) => {
+            return _.pluck(t, 'query');
         });
 
-        let query = "SELECT @rid, text, entities, message_id,service, "+_.keys(tokens).join(',')+", createdAt, lang, updatedAt, first(in('reply')) as reply, user.exclude('_raw','credentials','account_credentials') AS author \
+        //select text, $replies from message LET $replies = (SELECT FROM (traverse in('reply') FROM $current) WHERE $depth >= 1) where segment=1 AND replyto is null
+
+        let query = "SELECT @rid.asString(), text, inE('reply') as in_reply, entities, message_id,service, " + _.keys(tokens).join(',') + ", createdAt, lang, updatedAt \
             FROM message \
-            WHERE processed=true";
+            WHERE processed=true \
+            AND replyto is null";
+
         if (lang)
-            query+=" AND lang=:lang";
+        {
+            query += " AND lang=:lang";
+        }
 
         let safe_params = {
             lang: lang
         };
 
-        for (let token in tokens)
-        {
-            if (_.size(tokens[token])==1)
-                query+=" AND "+token+" = '" + _.first(tokens[token]) + "'";
-            else
-                query+=" AND "+token+" IN [" + _.map(tokens[token],(v)=>"'"+v+"'").join(',') + "]";
+        for (let token in tokens) {
+            if (_.size(tokens[token]) == 1) {
+                query += " AND " + token + " = '" + _.first(tokens[token]) + "'";
+            }
+            else {
+                query += " AND " + token + " IN [" + _.map(tokens[token], (v) => "'" + v + "'").join(',') + "]";
+            }
         }
 
-        query += " LIMIT "+params.depth;
-        query += " FETCHPLAN author:1 reply:1";
+        query += " ORDER BY createdAt DESC";
+        query += " LIMIT " + params.depth;
+        query += " FETCHPLAN [*]in_*:-1";
 
         // console.log(query);
+
         let data = await Message.query(query,
-        {
-            params: safe_params
-        });
-        data = _.map(data,(o)=>_.omit(o,['@version','@type']));
+            {
+                params: safe_params
+            });
 
-        return Message.removeCircularReferences(data);
+        Message.removeCircularReferences(data);
+
+        let userlist = _.uniq(recurseUser(data));
+        // console.log(userlist);
+        let users = await User.query('SELECT @rid.asString() as id, account, service, account_number, name, profile, link FROM ['+userlist.join(',')+']');
+
+        // console.log(users);
+        applyUsers(data,users);
+
+        data = omitDeep(data,['@version','@type','_raw','@class','credentials','account_credentials','replyto','user_from','out_reply','in','replytolink']);
+
+        return data;
     },
-
-    // query with a given criteria statically
-    // heuristicQuery: async (params) => {
-
-    //     //TODO: threaded view:
-
-    //     let lang = params.lang;
-
-    //     let tokens = _.groupBy(params.query, 'name');
-    //     tokens = _.mapValues(tokens, (t) => {
-    //         return _.pluck(t, 'query');
-    //     });
-
-    //     //select text, $replies from message LET $replies = (SELECT FROM (traverse in('reply') FROM $current) WHERE $depth >= 1) where segment=1 AND replyto is null
-
-    //     let query = "SELECT @rid.asString(), text, in('reply').exclude('replyto','_raw','user_from','out_reply') as replies, entities, message_id,service, " + _.keys(tokens).join(',') + ", createdAt, lang, updatedAt, user.exclude('_raw','credentials','account_credentials') AS author \
-    //         FROM message \
-    //         WHERE processed=true \
-    //         AND replyto is null";
-
-    //     if (lang)
-    //     {
-    //         query += " AND lang=:lang";
-    //     }
-
-    //     let safe_params = {
-    //         lang: lang
-    //     };
-
-    //     for (let token in tokens) {
-    //         if (_.size(tokens[token]) == 1) {
-    //             query += " AND " + token + " = '" + _.first(tokens[token]) + "'";
-    //         }
-    //         else {
-    //             query += " AND " + token + " IN [" + _.map(tokens[token], (v) => "'" + v + "'").join(',') + "]";
-    //         }
-    //     }
-
-    //     query += " ORDER BY createdAt DESC";
-    //     query += " LIMIT " + params.depth;
-    //     query += " FETCHPLAN author:1 replies:1 [*]in_reply:-1 *:-1 user:-1 ";
-
-    //     // console.log(query);
-    //     let data = await Message.query(query,
-    //         {
-    //             params: safe_params
-    //         });
-
-    //     Message.removeCircularReferences(data);
-    //     // console.log(data);
-
-    //     // data = omitDeep(data,['@version','@type','_raw','@class','credentials','account_credentials']);
-
-    //     return data;
-    // },
 
     /**
      * For visualisation / linear timeline of data
