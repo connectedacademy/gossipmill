@@ -9,7 +9,8 @@
         "Message":true,
         "SubscriptionManager":true,
         "Twitter":true,
-        "User":true
+        "User":true,
+        "Submission":true
     },
     "parserOptions": {
         "ecmaVersion": 8,

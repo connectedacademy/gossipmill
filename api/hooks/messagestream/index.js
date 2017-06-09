@@ -13,9 +13,15 @@ module.exports = function(sails)
                 });
 
                 redis.on('message', async function (channel, message) {
-                    // let msg = JSON.parse(message);
-                    sails.log.verbose('PubSub Message',message);
-                    processMessage('UPDATE',message);
+                    switch (channel)
+                    {
+                        case 'messages':
+                            // let msg = JSON.parse(message);
+                            sails.log.verbose('PubSub Message',message);
+                            processMessage('UPDATE',message);
+                            break;
+                    }
+
                 });
 
                 cb();
