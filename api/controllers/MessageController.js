@@ -31,7 +31,14 @@ module.exports = {
     },
 
     /**
-     * Done
+     *
+     * @api {get} /services List Services
+     * @apiDescription List all messaging services that have been used to source messages e.g. Twitter
+     * @apiName services
+     * @apiGroup Utility
+     * @apiVersion  1.0.0
+     * @apiPermission auth
+     *
      */
     services: async (req,res)=>{
         try
@@ -52,6 +59,17 @@ module.exports = {
         }
     },
 
+    /**
+     *
+     * @api {post} /messages/unsubscribe Unsubscribe
+     * @apiDescription Unsubscribe to message updates
+     * @apiName unsubscribe
+     * @apiGroup Messages
+     * @apiVersion  1.0.0
+     * @apiPermission auth
+     * @apiPermission websocket
+     *
+     */
     unsubscribe: async (req,res)=>{
 
         sails.log.verbose('Unsubscribe from '+ req.body.socketid);
@@ -69,6 +87,17 @@ module.exports = {
         }
     },
 
+    /**
+     *
+     * @api {post} /messages/subscribe Subscribe
+     * @apiDescription Subscribe to message updates matching a criteria
+     * @apiName subscribe
+     * @apiGroup Messages
+     * @apiVersion  1.0.0
+     * @apiPermission auth
+     * @apiPermission websocket
+     *
+     */
     subscribe: async (req,res)=>{
 
         //when new messages come in, needs to run the subscribe filter and send to the right people
@@ -98,6 +127,16 @@ module.exports = {
         }
     },
 
+    /**
+     *
+     * @api {post} /messages/summary Summary
+     * @apiDescription Single message representing this criteria, with stats
+     * @apiName summary
+     * @apiGroup Messages
+     * @apiVersion  1.0.0
+     * @apiPermission auth
+     *
+     */
     summary: async (req,res) =>{
 
         req.checkBody(filter_schema);
@@ -153,6 +192,16 @@ module.exports = {
         }
     },
 
+    /**
+     *
+     * @api {post} /messages/list List
+     * @apiDescription List message threads matching criteria
+     * @apiName list
+     * @apiGroup Messages
+     * @apiVersion  1.0.0
+     * @apiPermission auth
+     *
+     */
     list: async (req,res) => {
 
         req.checkBody('depth').isInt();
@@ -216,7 +265,14 @@ module.exports = {
     },
 
     /**
-     * Done
+     *
+     * @api {post} /messages/totals Totals
+     * @apiDescription Return number of messages for criteria, grouped by supplied field.
+     * @apiName totals
+     * @apiGroup Messages
+     * @apiVersion  1.0.0
+     * @apiPermission auth
+     *
      */
     totals: async (req, res)=>{
 
@@ -248,7 +304,14 @@ module.exports = {
     },
 
     /**
-     * Done
+     *
+     * @api {post} /messages/visualisation Visualisation
+     * @apiDescription List of totals for the given criteria grouped by supplied field. To be used for visualising contributions across a linear criteria range.
+     * @apiName visualisaion
+     * @apiGroup Messages
+     * @apiVersion  1.0.0
+     * @apiPermission auth
+     *
      */
     visualisation: async (req,res)=>{
 
@@ -281,7 +344,14 @@ module.exports = {
     },
 
     /**
-     * Done
+     *
+     * @api {post} /messages/create Create
+     * @apiDescription Creates a message on a given service
+     * @apiName create
+     * @apiGroup Messages
+     * @apiVersion  1.0.0
+     * @apiPermission auth
+     *
      */
     create: async (req,res)=>{
 

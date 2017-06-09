@@ -1,0 +1,12 @@
+{
+  "name":"Gossipmill",
+  "title": "Connected Academy Gossipmill API",
+  "version": "1.0.0",
+  "description": "API documentation for the Gossipmill API",
+  "url":"https://api.connectedacademy.io",
+  "sampleUrl":"http://localhost:4000",
+  "template":{
+      "withGenerator":false,
+      "withCompare":false
+  }
+}
