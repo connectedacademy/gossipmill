@@ -17,11 +17,18 @@ let applyUsers = function(data,users)
 {
     for (let o of data)
     {
+        // console.log("apply: " + _.size(data));
         if (_.isObject(o))
         {
+            o.createdAt = o.createdAt.toString();
             if (!_.isObject(o.user) && !_.isEmpty(o.user))
             {
-                o.user = _.find(users,{'id':o.user});
+                // console.log(o.user);
+                let u = _.find(users,{'id':o.user});
+                // console.log(u);
+                o.user = u;
+                // console.log(o.user);
+                // o.thisishere = "AQSDASDASDASDASD"
             }
             applyUsers(_.without(_.pluck(o.in_reply,'out'),null),users);
         }
@@ -85,7 +92,7 @@ module.exports = {
             return _.pluck(t, 'query');
         });
 
-        let query = "SELECT @rid.asString(), text, list(inE('reply')) as in_reply, entities, message_id,service, " + _.keys(tokens).join(',') + ", createdAt, lang, updatedAt \
+        let query = "SELECT @rid.asString(), text, list(inE('reply')) as in_reply, entities, message_id,service, " + _.keys(tokens).join(',') + ", createdAt.asString(), lang, updatedAt.asString() \
             FROM message \
             WHERE processed=true \
             AND replyto is null";
@@ -101,7 +108,8 @@ module.exports = {
 
         for (let token in tokens) {
             if (_.size(tokens[token]) == 1) {
-                query += " AND " + token + " = '" + _.first(tokens[token]) + "'";
+                if (_.first(tokens[token])!='*')
+                    query += " AND " + token + " = '" + _.first(tokens[token]) + "'";
             }
             else {
                 query += " AND " + token + " IN [" + _.map(tokens[token], (v) => "'" + v + "'").join(',') + "]";
@@ -112,16 +120,27 @@ module.exports = {
         query += " LIMIT " + params.depth;
         query += " FETCHPLAN *:-1 [*]user:-2 [*]out_reply:-2 [*]in:-2";
 
+        // console.log(query);
+
         let data = await Message.query(query,
             {
                 params: safe_params
             });
 
+        // console.log(data);
+
         Message.removeCircularReferences(data);
 
         let userlist = _.uniq(recurseUser(data));
-        let users = await User.query('SELECT @rid.asString() as id, account, service, account_number, name, profile, link FROM ['+userlist.join(',')+']');
+        // console.log(userlist);
+        let users = await User.query('SELECT @rid.asString() as id, account, service, account_number, name, profile, link FROM user WHERE @rid IN ['+userlist.join(',')+']');
+        // let tmp = 'SELECT @rid.asString() as id, account, service, account_number, name, profile, link FROM user WHERE @rid IN ['+userlist.join(',')+']';
+
+        // console.log(tmp);
+
+        // console.log(users);
         applyUsers(data,users);
+        // console.log(data);
         removeEdges(data);
 
         data = omitDeep(data,['@version','@type','_raw','@class','credentials','account_credentials','replyto','user_from','out_reply','in','replytolink']);

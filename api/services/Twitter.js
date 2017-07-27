@@ -90,7 +90,7 @@ module.exports = {
                         expanded_url: u,
                         url: u
                     });
-                    newmessage.text = newmessage.text.replace(u, 'http://a.short.link');
+                    // newmessage.text = newmessage.text.replace(u, 'http://a.short.link');
                 }
             }
 
@@ -112,7 +112,13 @@ module.exports = {
             }
 
             newmessage.entities = entities;
-            newmessage.user_from = _.omit(thisuser['_raw'],'@type');
+            try
+            {
+                newmessage.user_from = _.omit(thisuser['_raw'],'@type');
+            }
+            catch(e) {
+
+            }
             newmessage.lang = 'en';
 
             //push this into the beanstalk queue:
