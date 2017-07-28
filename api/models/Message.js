@@ -26,7 +26,9 @@ let applyUsers = function(data,users)
                 // console.log(o.user);
                 let u = _.find(users,{'id':o.user});
                 // console.log(u);
-                o.user = u;
+                o.author = u;
+
+                delete o.user;
                 // console.log(o.user);
                 // o.thisishere = "AQSDASDASDASDASD"
             }
@@ -92,7 +94,7 @@ module.exports = {
             return _.pluck(t, 'query');
         });
 
-        let query = "SELECT @rid.asString(), text, list(inE('reply')) as in_reply, entities, message_id,service, " + _.keys(tokens).join(',') + ", createdAt.asString(), lang, updatedAt.asString() \
+        let query = "SELECT @rid.asString(), text, list(inE('reply')) as in_reply, entities, message_id,service, user.asString() as author, " + _.keys(tokens).join(',') + ", createdAt.asString(), lang, updatedAt.asString() \
             FROM message \
             WHERE processed=true \
             AND replyto is null";
@@ -139,13 +141,13 @@ module.exports = {
         // console.log(tmp);
 
         // console.log(users);
-        applyUsers(data,users);
+        applyUsers(data, users);
         // console.log(data);
         removeEdges(data);
 
         data = omitDeep(data,['@version','@type','_raw','@class','credentials','account_credentials','replyto','user_from','out_reply','in','replytolink']);
 
-
+            // console.log(data);
         return data;
     },
 
