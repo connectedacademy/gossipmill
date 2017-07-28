@@ -97,7 +97,7 @@ module.exports = {
         });
 
 //        let query = "SELECT @rid.asString(), text, list(inE('reply')) as in_reply, entities, message_id,service, user.asString() as user, " + _.keys(tokens).join(',') + ", createdAt.asString(), lang, updatedAt.asString() \
-        let query = "SELECT @rid.asString(), text, entities, message_id,service, user.asString() as user, " + _.keys(tokens).join(',') + ", createdAt.asString(), lang, updatedAt.asString() \
+        let query = "SELECT @rid.asString(), text, inE('reply') as in_reply, entities, message_id,service, user.asString() as user, " + _.keys(tokens).join(',') + ", createdAt.asString(), lang, updatedAt.asString() \
             FROM message \
             WHERE processed=true \
             AND replyto is null";
