@@ -96,7 +96,8 @@ module.exports = {
             return _.pluck(t, 'query');
         });
 
-        let query = "SELECT @rid.asString(), text, list(inE('reply')) as in_reply, entities, message_id,service, user.asString() as user, " + _.keys(tokens).join(',') + ", createdAt.asString(), lang, updatedAt.asString() \
+//        let query = "SELECT @rid.asString(), text, list(inE('reply')) as in_reply, entities, message_id,service, user.asString() as user, " + _.keys(tokens).join(',') + ", createdAt.asString(), lang, updatedAt.asString() \
+        let query = "SELECT @rid.asString(), text, entities, message_id,service, user.asString() as user, " + _.keys(tokens).join(',') + ", createdAt.asString(), lang, updatedAt.asString() \
             FROM message \
             WHERE processed=true \
             AND replyto is null";
@@ -131,6 +132,8 @@ module.exports = {
                 params: safe_params
             });
 
+        console.log(query);
+
         // console.log(data);
 
         Message.removeCircularReferences(data);
@@ -140,7 +143,7 @@ module.exports = {
         let users = await User.query('SELECT @rid.asString() as id, account, service, account_number, name, profile, link FROM user WHERE @rid IN ['+userlist.join(',')+']');
         // let tmp = 'SELECT @rid.asString() as id, account, service, account_number, name, profile, link FROM user WHERE @rid IN ['+userlist.join(',')+']';
 
-        // console.log(tmp);
+        console.log(data);
 
         // console.log(users);
         applyUsers(data, users);
