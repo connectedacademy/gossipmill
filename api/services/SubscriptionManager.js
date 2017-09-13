@@ -7,12 +7,14 @@ module.exports = {
 
         let roomname = 'query-'+subscription.socketid;
 
+        // console.log(subscription);
+
         queryStore[roomname] = subscription;
 
         sails.log.verbose('Attempting subscribe to / update', roomname);
 
         sails.sockets.join(req.socket, roomname, ()=>{
-            sails.log.verbose('Subscribed to room', roomname);
+            sails.log.verbose('Subscribed to room', roomname, subscription);
         });
 
         return roomname;
@@ -21,7 +23,9 @@ module.exports = {
     unsubscribe: async(socketid)=>{
         let roomname = 'query-'+socketid;
         delete queryStore[roomname];
-        sails.sockets.leave(roomname,()=>{
+        console.log("unsubscribe:" + roomname);
+        sails.sockets.leave(roomname,(err)=>{
+            sails.log.error(err);
             sails.log.verbose('Left room',roomname);
         });
     },

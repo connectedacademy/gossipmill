@@ -328,7 +328,7 @@ module.exports = {
 
         let tokens = _.groupBy(params.filter_by, 'name');
         tokens = _.mapValues(tokens, (t) => {
-            return _.pluck(t, 'query');
+            return _.pluck(t, 'query').map((i)=>{return i.toString()});
         });
 
         for (let token in tokens) {
