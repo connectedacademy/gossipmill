@@ -97,7 +97,7 @@ module.exports = {
         });
 
 //        let query = "SELECT @rid.asString(), text, list(inE('reply')) as in_reply, entities, message_id,service, user.asString() as user, " + _.keys(tokens).join(',') + ", createdAt.asString(), lang, updatedAt.asString() \
-        let query = "SELECT @rid.asString(), text, inE('reply') as in_reply, entities, message_id,service, user.asString() as user, " + _.keys(tokens).join(',') + ", createdAt.asString(), lang, updatedAt.asString() \
+        let query = "SELECT @rid.asString(), text, inE('reply') as in_reply, entities, message_id,service, user.asString() as user, " + _.keys(tokens).join(',') + ", createdAt.format(\"yyyy-MM-dd'T'HH:mm:ss.SSSZ\"), lang, updatedAt.asString() \
             FROM message \
             WHERE processed=true \
             AND replyto is null";
@@ -254,7 +254,7 @@ module.exports = {
             return _.pluck(t, 'query');
         });
 
-        let query = "SELECT FROM (SELECT $ismine as ismine, @rid,text,entities, message_id,service," + _.keys(tokens).join(',') + ", createdAt, lang, updatedAt, user.exclude('_raw','credentials','account_credentials') AS author \
+        let query = "SELECT FROM (SELECT $ismine as ismine, @rid,text,entities, message_id,service," + _.keys(tokens).join(',') + ", createdAt.format(\"yyyy-MM-dd'T'HH:mm:ss.SSSZ\"), lang, updatedAt.format(\"yyyy-MM-dd'T'HH:mm:ss.SSSZ\"), user.exclude('_raw','credentials','account_credentials') AS author \
             FROM message \
             LET $ismine = if(eval(\"user.account='"+params.account+"' AND user.service='"+params.service+"'\"),1,0)";
 
