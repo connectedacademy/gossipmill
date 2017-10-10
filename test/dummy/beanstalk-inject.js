@@ -11,7 +11,7 @@ let beanstalk = new fivebeans.client(process.env.BEANSTALK_SERVER, 11300);
 let run = async() => {
 
 
-    let testspec_raw = await request('https://testclass.connectedacademy.io/course/config/spec.yaml');
+    let testspec_raw = await request('https://interpretation.connectedacademy.io/course/config/spec.yaml');
     let testspec = yaml.safeLoad(testspec_raw);
 
     beanstalk.on('error', function (err) {
@@ -49,7 +49,7 @@ let run = async() => {
         if (rand > 0.8)
         {
             newmessage.entities.urls.push({
-                expanded_url: "https://testclass.connectedacademy.io/#/submission/evidence/intro"
+                expanded_url: "https://interpretation.connectedacademy.io/#/submission/interpretation/homework"
             });
             newmessage.entities.urls.push({
                 expanded_url: "https://connectedacademy.io/test/4c1.html"
@@ -65,7 +65,7 @@ let run = async() => {
             let content = _.sample(klass.content);
             if (content.slug)
                 newmessage.entities.urls.push({
-                    expanded_url: `https://testclass.connectedacademy.io/#/course/${klass.slug}/${content.slug}`
+                    expanded_url: `https://interpretation.connectedacademy.io/#/course/${klass.slug}/${content.slug}`
                 });
         }
 

@@ -65,6 +65,8 @@ module.exports = {
             newmessage.text = msg.text;
             newmessage.service = 'twitter';
             newmessage.createdAt = new Date();
+            if (msg.replyto)
+                newmessage.replyto = await Message.findOne({'message_id':msg.replyto});
             //generate entities
             let entities = {
                 urls:[],
@@ -120,6 +122,8 @@ module.exports = {
 
             }
             newmessage.lang = 'en';
+
+console.log(newmessage);
 
             //push this into the beanstalk queue:
             let m = JSON.stringify({type:'message',payload:newmessage});

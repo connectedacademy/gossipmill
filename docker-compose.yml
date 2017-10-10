@@ -6,6 +6,7 @@ networks:
 services:
   gossipmill:
     build: .
+    image: connectedacademy/gossipmill:latest
     volumes:
       - ./api:/usr/src/app/api
       - ./config:/usr/src/app/config

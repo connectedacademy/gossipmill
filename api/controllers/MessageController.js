@@ -380,7 +380,8 @@ module.exports = {
             let credentials = req.body.credentials;
 
             let msg = {
-                text: req.body.text
+                text: req.body.text,
+                replyto: req.body.replyto
             };
 
             if (service == 'twitter')
