@@ -43,7 +43,7 @@ module.exports = {
     services: async (req,res)=>{
         try
         {
-            sails.log.verbose('List services')
+            // sails.log.verbose('List services')
             let results = await Message.query("SELECT DISTINCT(service) FROM message LIMIT 20;");
             let normalised = _.map(results,(r)=>{
                 return {
@@ -72,7 +72,7 @@ module.exports = {
      */
     unsubscribe: async (req,res)=>{
 
-        sails.log.verbose('Unsubscribe from '+ req.body.socketid);
+        // sails.log.verbose('Unsubscribe from '+ req.body.socketid);
 
         try
         {
@@ -105,7 +105,7 @@ module.exports = {
         let user_service = req.param('service'); //i.e. twitter
         let user_account = req.param('user');// i.e. @tombartindale
 
-        sails.log.verbose('Subscribe to messages')
+        // sails.log.verbose('Subscribe to messages')
 
         let params = req.body;
 
@@ -169,7 +169,7 @@ module.exports = {
         params.whitelist = req.param('whitelist');
         params.lang = req.param('lang');
 
-        sails.log.verbose('Query messages', params);
+        // sails.log.verbose('Query messages', params);
 
         try
         {
@@ -238,7 +238,7 @@ module.exports = {
         params.service = user_service;
         params.whitelist = req.param('whitelist');
 
-        sails.log.verbose('Query messages', params);
+        // sails.log.verbose('Query messages', params);
 
         try
         {
@@ -293,7 +293,7 @@ module.exports = {
 
         try
         {
-           sails.log.verbose('Total', query);
+        //    sails.log.verbose('Total', query);
            let data = await Message.heuristicTotal(query);
            return res.json(data);
         }
@@ -333,7 +333,7 @@ module.exports = {
 
         try
         {
-           sails.log.verbose('Visualisation', query.group_by.name, query.filter_by);
+        //    sails.losg.verbose('Visualisation', query.group_by.name, query.filter_by);
            let data = await Message.heuristicGroup(query);
            return res.json(data);
         }
@@ -404,7 +404,7 @@ module.exports = {
             }
             else
             {
-                sails.log.verbose('Invalid service requested ' + service)
+                sails.log.error('Invalid service requested ' + service)
                 return res.badRequest('Only Twitter is supported right now');
             }
         }

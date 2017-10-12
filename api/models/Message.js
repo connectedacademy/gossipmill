@@ -132,7 +132,7 @@ module.exports = {
                 params: safe_params
             });
 
-        console.log(query);
+        // console.log(query);
 
         // console.log(data);
 
@@ -143,7 +143,7 @@ module.exports = {
         let users = await User.query('SELECT @rid.asString() as id, account, service, account_number, name, profile, link FROM user WHERE @rid IN ['+userlist.join(',')+']');
         // let tmp = 'SELECT @rid.asString() as id, account, service, account_number, name, profile, link FROM user WHERE @rid IN ['+userlist.join(',')+']';
 
-        console.log(data);
+        // console.log(data);
 
         // console.log(users);
         applyUsers(data, users);

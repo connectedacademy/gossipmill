@@ -9,15 +9,13 @@ module.exports = function(sails)
             sails.on('hook:orm:loaded', async function() {
 
                 redis.subscribe('messages', function (err, count) {
-                    sails.log.info('Subscribed to messages channel on Redis');
+                    sails.log.info('MessageStream',{msg:'Subscribed to messages channel on Redis'});
                 });
 
                 redis.on('message', async function (channel, message) {
                     switch (channel)
                     {
                         case 'messages':
-                            // let msg = JSON.parse(message);
-                            sails.log.verbose('PubSub Message',message);
                             processMessage('UPDATE',message);
                             break;
                     }
@@ -33,7 +31,10 @@ module.exports = function(sails)
 var processMessage = async function(operation, message)
 {
     //for each rule in settings
-    sails.log.verbose("Process Message",operation,message.id);
+    sails.log.silly("MessageStream",{
+        operation:operation,
+        message: message.id
+    });
 
     if (operation == 'DELETE')
     {

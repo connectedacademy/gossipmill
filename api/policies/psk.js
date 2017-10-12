@@ -5,7 +5,7 @@ module.exports = function(req,res,next){
     }
     else
     {
-        sails.log.verbose('Invalid PSK',req.url);
+        sails.log.error('Invalid PSK',req.url);
         return res.forbidden('Invalid Pre-shared-key');
     }
 }

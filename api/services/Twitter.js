@@ -13,16 +13,16 @@ if (process.env.BYPASS_TWITTER==='true')
     })
     .on('close', function()
     {
-        sails.log.error("Beanstalk Closed");
+        sails.log.error("Beanstalk",{msg:"closed"});
     })
     .on('connect', function()
     {
-        sails.log.info("Beanstalk Connected");
+        sails.log.info("Beanstalk",{msg:"Server connected"});
         beanstalk.use('messages', function (err, tubename) {
             if (err)
                 sails.log.error(err);
             else
-                sails.log.info("Connected to " + tubename);
+                sails.log.info("Beanstalk",{msg:"Connected to " + tubename});
         });
     });
     beanstalk.connect();
@@ -123,7 +123,7 @@ module.exports = {
             }
             newmessage.lang = 'en';
 
-console.log(newmessage);
+// console.log(newmessage);
 
             //push this into the beanstalk queue:
             let m = JSON.stringify({type:'message',payload:newmessage});

@@ -1,7 +1,7 @@
 module.exports.policies = {
-    '*':['psk','jsononly','cors'],
+    '*':['psk','jsononly'],
     'message':{
         'root':true,
-        'subscribe':['psk','jsononly','cors'] //socketonly
+        'subscribe':['psk','socketonly'] //socketonly
     }
 };
