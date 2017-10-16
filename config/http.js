@@ -45,7 +45,6 @@ module.exports.http = {
       'validator',
       'responseTimeLogger',
       'handleBodyParserError',
-      'userAgent',
       'compress',
       'methodOverride',
       'poweredBy',
