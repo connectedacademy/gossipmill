@@ -27,7 +27,8 @@
     "uuid": "3.0.1",
     "omit-deep-lodash":"1.0.0",
     "apidoc": "0.17.6",
-    "user-agent":"1.0.4"
+    "user-agent":"1.0.4",
+    "winston-logzio":"1.0.3"
   },
   "devDependencies": {
     "lorem-ipsum": "1.0.4",
