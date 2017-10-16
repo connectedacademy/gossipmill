@@ -15,7 +15,7 @@ if (!process.env.CI && process.env.NODE_ENV=='production')
   let loggerOptions = {
       token: process.env.LOGZ_TOKEN,
       host: 'listener.logz.io',
-      type: 'watercooler',
+      type: 'gossipmill',
       level: 'verbose'
   };
   customLogger.on('error',(err)=>{
