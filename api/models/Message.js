@@ -102,7 +102,7 @@ module.exports = {
             WHERE processed=true \
             AND replyto is null";
 
-        if (lang)
+        if (lang && lang != '*')
         {
             query += " AND lang=:lang";
         }
@@ -125,8 +125,8 @@ module.exports = {
         query += " LIMIT " + params.depth;
         query += " FETCHPLAN *:-1 [*]user:-2 [*]out_reply:-2 [*]in:-2";
 
-        // console.log(query);
-
+        console.log(query);
+        console.log(safe_params);
         let data = await Message.query(query,
             {
                 params: safe_params
@@ -169,7 +169,7 @@ module.exports = {
             FROM message \
             WHERE processed=true \
             AND "+grouper+" IS NOT null";
-        if (lang)
+        if (lang && lang!='*')
             query += " AND lang=:lang";
 
         let tokens = _.groupBy(params.filter_by, 'name');
@@ -260,7 +260,7 @@ module.exports = {
 
         let where = "WHERE processed=true";
 
-        if (lang)
+        if (lang && lang!='*')
             where += " AND lang=:lang";
 
         let safe_params = {
