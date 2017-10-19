@@ -99,8 +99,8 @@ module.exports = {
 //        let query = "SELECT @rid.asString(), text, list(inE('reply')) as in_reply, entities, message_id,service, user.asString() as user, " + _.keys(tokens).join(',') + ", createdAt.asString(), lang, updatedAt.asString() \
         let query = "SELECT @rid.asString(), text, inE('reply') as in_reply, entities, message_id,service, user.asString() as user, " + _.keys(tokens).join(',') + ", createdAt.format(\"yyyy-MM-dd'T'HH:mm:ss.SSSZ\"), lang, updatedAt.asString() \
             FROM message \
-            WHERE processed=true \
-            AND replyto is null";
+            WHERE processed=true";
+//            AND replyto is null";
 
         if (lang && lang != '*')
         {
@@ -114,10 +114,19 @@ module.exports = {
         for (let token in tokens) {
             if (_.size(tokens[token]) == 1) {
                 if (_.first(tokens[token])!='*')
-                    query += " AND " + token + " = '" + _.first(tokens[token]) + "'";
+                    if (_.first(tokens[token])=='null')
+                        query += " AND " + token + " is null";
+                    else
+                        query += " AND " + token + " = '" + _.first(tokens[token]) + "'";
             }
             else {
-                query += " AND " + token + " IN [" + _.map(tokens[token], (v) => "'" + v + "'").join(',') + "]";
+                query += " AND " + token + " IN [" + _.map(tokens[token], function(v){
+                    if (v[0] == '#')
+                        return v;
+                    else
+                        return "'" + v + "'";
+
+                }).join(',') + "]";
             }
         }
 
@@ -186,7 +195,13 @@ module.exports = {
                 query += " AND " + token + " = '" + _.first(tokens[token]) + "'";
             }
             else {
-                query += " AND " + token + " IN [" + _.map(tokens[token], (v) => "'" + v + "'").join(',') + "]";
+                query += " AND " + token + " IN [" + _.map(tokens[token], function(v){
+                    if (v[0] == '#')
+                        return v;
+                    else
+                        return "'" + v + "'";
+
+                }).join(',') + "]";
             }
         }
 
@@ -226,7 +241,13 @@ module.exports = {
                 query += " AND " + token + " = '" + _.first(tokens[token]) + "'";
             }
             else {
-                query += " AND " + token + " IN [" + _.map(tokens[token], (v) => "'" + v + "'").join(',') + "]";
+                query += " AND " + token + " IN [" + _.map(tokens[token], function(v){
+                    if (v[0] == '#')
+                        return v;
+                    else
+                        return "'" + v + "'";
+
+                }).join(',') + "]";
             }
         }
 
@@ -274,7 +295,13 @@ module.exports = {
                 where += " AND " + token + " = '" + _.first(tokens[token]) + "'";
             }
             else {
-                where += " AND " + token + " IN [" + _.map(tokens[token], (v) => "'" + v + "'").join(',') + "]";
+                where += " AND " + token + " IN [" + _.map(tokens[token], function(v){
+                    if (v[0] == '#')
+                        return v;
+                    else
+                        return "'" + v + "'";
+
+                }).join(',') + "]";
             }
         }
 
