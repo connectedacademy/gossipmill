@@ -313,7 +313,7 @@ module.exports = {
         //     {
         //         params: safe_params
         //     });
-        let contributors = Cache.queryCache(Message,tokens, "SELECT COUNT(user_from.id_str) as count, user.exclude('_raw','credentials','account_credentials') AS author FROM message " + where + " GROUP BY user_from.id_str ORDER BY count DESC LIMIT 5 FETCHPLAN author:1 ",
+        let contributors = Cache.queryCache(Message,tokens, "SELECT COUNT(user_from.id_str) as count, user.exclude('_raw','credentials','account_credentials') AS author FROM message " + where + " GROUP BY user_from.id_str ORDER BY count DESC FETCHPLAN author:1 ",
             {
                 params: safe_params
             });
@@ -327,12 +327,12 @@ module.exports = {
             info: {
                 hashtags: _.map(result[1], (f) => _.omit(f, ['@version', '@type'])),
                 total: _.sum(_.pluck(result[2],'count')),
-                contributors: _.map(result[2], (f) => {
+                contributors: _.sampleSize(_.map(result[2], (f) => {
                     return {
                         author: _.omit(f.author, ['@version', '@type', '@class']),
                         count: f.count
                     }
-                })
+                }),5)
             },
             message: data
         });
