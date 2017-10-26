@@ -134,34 +134,24 @@ module.exports = {
         query += " LIMIT " + params.depth;
         query += " FETCHPLAN *:-1 [*]user:-2 [*]out_reply:-2 [*]in:-2";
 
-        console.log(query);
-        console.log(safe_params);
         let data = await Message.query(query,
             {
                 params: safe_params
             });
 
-        // console.log(query);
-
-        // console.log(data);
 
         Message.removeCircularReferences(data);
 
         let userlist = _.uniq(recurseUser(data));
-        // console.log(userlist);
+
         let users = await User.query('SELECT @rid.asString() as id, account, service, account_number, name, profile, link FROM user WHERE @rid IN ['+userlist.join(',')+']');
-        // let tmp = 'SELECT @rid.asString() as id, account, service, account_number, name, profile, link FROM user WHERE @rid IN ['+userlist.join(',')+']';
 
-        // console.log(data);
-
-        // console.log(users);
         applyUsers(data, users);
-        // console.log(data);
+
         removeEdges(data);
 
         data = omitDeep(data,['@version','@type','_raw','@class','credentials','account_credentials','replyto','user_from','out_reply','in','replytolink','admin','user','user2']);
 
-            // console.log(data);
         return data;
     },
 
@@ -265,7 +255,6 @@ module.exports = {
         return newobj;
     },
 
-
     //TODO: Bubble up the 'most interesting thing' in the segment query
     heuristicSummary: async (params) => {
         let lang = params.lang;
@@ -305,36 +294,40 @@ module.exports = {
             }
         }
 
+        // console.log(tokens);
+
         query += where;
         query += ") ORDER BY ismine DESC";
         query += " LIMIT 1";
         query += " FETCHPLAN author:1";
 
-        let data = Message.query(query,
+        let data = Cache.queryCache(Message, tokens, query,
             {
                 params: safe_params
             });
-        let hashtags = Message.query("SELECT count(hashtags) as count, hashtags as hashtag FROM (SELECT entities.hashtags.text as hashtags FROM message " + where + " UNWIND hashtags) GROUP BY hashtags ORDER BY count DESC LIMIT 5",
+        let hashtags = Cache.queryCache(Message, tokens, "SELECT count(hashtags) as count, hashtags as hashtag FROM (SELECT entities.hashtags.text as hashtags FROM message " + where + " UNWIND hashtags) GROUP BY hashtags ORDER BY count DESC LIMIT 5",
             {
                 params: safe_params
             });
-        let total = Message.query("SELECT count(@rid) as total FROM message " + where,
+        // let total = Cache.queryCache(Message,tokens, "SELECT count(@rid) as total FROM message " + where,
+        //     {
+        //         params: safe_params
+        //     });
+        let contributors = Cache.queryCache(Message,tokens, "SELECT COUNT(user_from.id_str) as count, user.exclude('_raw','credentials','account_credentials') AS author FROM message " + where + " GROUP BY user_from.id_str ORDER BY count DESC LIMIT 5 FETCHPLAN author:1 ",
             {
                 params: safe_params
             });
-        let contributors = Message.query("SELECT COUNT(user_from.id_str) as count, user.exclude('_raw','credentials','account_credentials') AS author FROM message " + where + " GROUP BY user_from.id_str ORDER BY count DESC LIMIT 5 FETCHPLAN author:1 ",
-            {
-                params: safe_params
-            });
-        let result = await Promise.all([data, hashtags, total, contributors]);
+        let result = await Promise.all([data, hashtags, contributors]);
+
+        // console.log(result);
 
         data = _.omit(_.first(result[0]), ['@version', '@type']);
 
         return Message.removeCircularReferences({
             info: {
                 hashtags: _.map(result[1], (f) => _.omit(f, ['@version', '@type'])),
-                total: _.first(result[2]).total,
-                contributors: _.map(result[3], (f) => {
+                total: _.sum(_.pluck(result[2],'count')),
+                contributors: _.map(result[2], (f) => {
                     return {
                         author: _.omit(f.author, ['@version', '@type', '@class']),
                         count: f.count

@@ -34,7 +34,7 @@ module.exports.connections = {
     schema: false,
     options:{
       useToken: true,
-      removeCircularReferences : false,
+      removeCircularReferences : true,
     }
   },
   'sails-disk':
