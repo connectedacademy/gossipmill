@@ -327,7 +327,7 @@ module.exports = {
             info: {
                 hashtags: _.map(result[1], (f) => _.omit(f, ['@version', '@type'])),
                 total: _.sum(_.pluck(result[2],'count')),
-                contributors: _.sampleSize(_.map(result[2], (f) => {
+                contributors: _.sample(_.map(result[2], (f) => {
                     return {
                         author: _.omit(f.author, ['@version', '@type', '@class']),
                         count: f.count
