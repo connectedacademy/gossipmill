@@ -305,7 +305,7 @@ module.exports = {
             {
                 params: safe_params
             });
-        let hashtags = Message.query(query, "SELECT count(hashtags) as count, hashtags as hashtag FROM (SELECT entities.hashtags.text as hashtags FROM message " + where + " UNWIND hashtags) GROUP BY hashtags ORDER BY count DESC LIMIT 5",
+        let hashtags = Message.query("SELECT count(hashtags) as count, hashtags as hashtag FROM (SELECT entities.hashtags.text as hashtags FROM message " + where + " UNWIND hashtags) GROUP BY hashtags ORDER BY count DESC LIMIT 5",
             {
                 params: safe_params
             });
@@ -313,7 +313,7 @@ module.exports = {
         //     {
         //         params: safe_params
         //     });
-        let contributors = Message.query(query, "SELECT COUNT(user_from.id_str) as count, user.exclude('_raw','credentials','account_credentials') AS author FROM message " + where + " GROUP BY user_from.id_str ORDER BY count DESC FETCHPLAN author:1 ",
+        let contributors = Message.query("SELECT COUNT(user_from.id_str) as count, user.exclude('_raw','credentials','account_credentials') AS author FROM message " + where + " GROUP BY user_from.id_str ORDER BY count DESC FETCHPLAN author:1 ",
             {
                 params: safe_params
             });
