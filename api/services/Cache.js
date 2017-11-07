@@ -1,9 +1,12 @@
 let redis = require('redis');
 let RedisIO = require('ioredis');
-let redisIO = new RedisIO(process.env.REDIS_PORT, process.env.REDIS_HOST,{
-    db:2
-}); //new Redis(6379, '192.168.1.1')
 
+// query cache connection
+let redisIO = new RedisIO(process.env.REDIS_PORT, process.env.REDIS_HOST,{
+    db:5
+});
+
+//subscription cache connection
 let rediscache = redis.createClient({
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT,
@@ -44,17 +47,34 @@ module.exports = {
         }
     },
 
-    removeMatching: function (keyPattern) {
+    getAllKeys:function(keyPattern)
+    {
+        // console.log("pattern:" + keyPattern);
         return new Promise((resolve, reject) => {
-            redisIO.keys(`${keyPattern}:*`).then(function (keys) {
-                // Use pipeline instead of sending
-                // one command each time to improve the
-                // performance.
-                var pipeline = redisIO.pipeline();
-                keys.forEach(function (key) {
-                    pipeline.del(key);
-                });
-                resolve(pipeline.exec());
+            let stream = redisIO.scanStream({
+                match: keyPattern
+            });
+            // let results = [];
+            stream.on('data', function (keys) {
+
+                if (keys.length) {
+                    var pipeline = redisIO.pipeline();
+                    keys.forEach(function (key) {
+                        pipeline.get(key);
+                    });
+                    pipeline.exec(function(err,results){
+                        resolve(_.map(results,function(obj){
+                            return obj[1];
+                        }));
+                    });
+                }
+                else
+                {
+                    resolve([]);
+                }
+            });
+            stream.on('end', function () {
+
             });
         });
     }

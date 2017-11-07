@@ -10,7 +10,8 @@
         "SubscriptionManager":true,
         "Twitter":true,
         "User":true,
-        "Submission":true
+        "Submission":true,
+        "Cache":true
     },
     "parserOptions": {
         "ecmaVersion": 8,
