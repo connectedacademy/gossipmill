@@ -297,7 +297,7 @@ module.exports = {
         // console.log(tokens);
 
         query += where;
-        query += ") ORDER BY ismine DESC";
+        query += ") ORDER BY ismine DESC, createdAt DESC";
         query += " LIMIT 1";
         query += " FETCHPLAN author:1";
 
