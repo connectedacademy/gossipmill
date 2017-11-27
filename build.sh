@@ -11,8 +11,13 @@ ISTHERE=$(curl -s --head -w %{http_code} https://hub.docker.com/v2/repositories/
 
 if [ $ISTHERE -ne '200' ]
 then
-    export VERSION=$PACKAGE_VERSION
     echo "VERSION DOES NOT EXIST, TAGGING"
+    docker pull $CONTAINER_TEST_IMAGE
+    docker login -u $DOCKER_USERNAME -p "$DOCKER_PASSWORD"
+    docker tag $CONTAINER_TEST_IMAGE $CONTAINER_DOCKERHUB_RELEASE:$PACKAGE_VERSION
+    docker tag $CONTAINER_TEST_IMAGE $CONTAINER_DOCKERHUB_RELEASE
+    docker push $CONTAINER_DOCKERHUB_RELEASE:$PACKAGE_VERSION
+    docker push $CONTAINER_DOCKERHUB_RELEASE
 else
     echo "INCREMENT VERSION USING npm version BEFORE RE-RUNNING"
     exit 1
