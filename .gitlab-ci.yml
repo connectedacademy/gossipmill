@@ -15,27 +15,11 @@ variables:
   ORIENTDB_USERNAME: root
   ORIENTDB_HOST: orientdb
 
-cache:
-  paths:
-  - node_modules/
-
-# test:
-#   tags:
-#     - local
-#   stage: test
-#   services:
-#     - redis:latest
-#   script:
-#     - docker pull $CONTAINER_TEST_IMAGE
-#     - docker run $CONTAINER_TEST_IMAGE npm test
-
 stages:
 - build
-# - test
 - release
 
 variables:
-  VERSION: 0.0.1
   CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
   CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
   CONTAINER_DOCKERHUB_VERSION: connectedacademy/gossipmill:$VERSION
@@ -62,6 +46,7 @@ dockerhub:
   script:
     - docker pull $CONTAINER_TEST_IMAGE
     - docker login -u $DOCKER_USERNAME -p "$DOCKER_PASSWORD"
+    - build.sh
     - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_DOCKERHUB_VERSION
     - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_DOCKERHUB_RELEASE
     - docker push $CONTAINER_DOCKERHUB_VERSION
