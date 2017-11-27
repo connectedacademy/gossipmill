@@ -1,6 +1,6 @@
 {
   "name": "gossipmill",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Backend application for aggregating and supplying messages from multiple sources given some criteria.",
   "main": "app.js",
   "dependencies": {
