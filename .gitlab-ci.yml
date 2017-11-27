@@ -46,7 +46,8 @@ dockerhub:
   script:
     - docker pull $CONTAINER_TEST_IMAGE
     - docker login -u $DOCKER_USERNAME -p "$DOCKER_PASSWORD"
-    - build.sh
+    - chmod +x build.sh
+    - ./build.sh
     - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_DOCKERHUB_VERSION
     - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_DOCKERHUB_RELEASE
     - docker push $CONTAINER_DOCKERHUB_VERSION
