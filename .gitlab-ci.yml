@@ -1,4 +1,8 @@
-image: docker:git
+image: docker:latest
+
+variables:
+  DOCKER_DRIVER: overlay2
+
 services:
   - docker:dind
   - redis:latest
@@ -31,9 +35,11 @@ stages:
 - release
 
 variables:
+  VERSION: 0.0.1
   CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
   CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
-  CONTAINER_DOCKERHUB_RELEASE: connectedacademy/gossipmill:latest
+  CONTAINER_DOCKERHUB_VERSION: connectedacademy/gossipmill:$VERSION
+  CONTAINER_DOCKERHUB_RELEASE: connectedacademy/gossipmill
 
 before_script:
   - docker login -u gitlab-ci-token -p "$CI_BUILD_TOKEN" $CI_REGISTRY
@@ -56,7 +62,9 @@ dockerhub:
   script:
     - docker pull $CONTAINER_TEST_IMAGE
     - docker login -u $DOCKER_USERNAME -p "$DOCKER_PASSWORD"
+    - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_DOCKERHUB_VERSION
     - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_DOCKERHUB_RELEASE
+    - docker push $CONTAINER_DOCKERHUB_VERSION
     - docker push $CONTAINER_DOCKERHUB_RELEASE
   only:
     - master
