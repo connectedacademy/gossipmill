@@ -1,7 +1,6 @@
 # GET VERSION:
 
-sudo apt-get update
-sudo apt-get install curl
+apk add --no-cache curl
 
 PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | tr -d '[[:space:]]')
 
