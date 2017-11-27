@@ -1,6 +1,6 @@
 {
   "name": "gossipmill",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Backend application for aggregating and supplying messages from multiple sources given some criteria.",
   "main": "app.js",
   "dependencies": {
@@ -18,27 +18,26 @@
     "winston-cloudwatch": "1.11.3",
     "winston-orientdb": "0.0.2",
     "fs-promise": "2.0.2",
-    "twitter":"1.7.0",
-    "express-validator":"3.1.3",
+    "twitter": "1.7.0",
+    "express-validator": "3.1.3",
     "ioredis": "3.2.1",
-    "redis":"2.8.0",
-    "fivebeans":"1.5.0",
+    "redis": "2.8.0",
+    "fivebeans": "1.5.0",
     "request-promise-native": "1.0.3",
     "js-yaml": "3.8.3",
-    "uuid": "3.0.1",
-    "omit-deep-lodash":"1.0.0",
+    "omit-deep-lodash": "1.0.0",
     "apidoc": "0.17.6",
-    "user-agent":"1.0.4",
-    "winston-logzio":"1.0.3",
+    "user-agent": "1.0.4",
+    "winston-logzio": "1.0.3",
     "md5": "2.2.1",
-    "bluebird":"3.5.1"
+    "bluebird": "3.5.1"
   },
   "devDependencies": {
     "lorem-ipsum": "1.0.4",
-    "random-words":"0.0.1",
+    "random-words": "0.0.1",
     "mocha": "^3.2.0",
     "supertest": "^3.0.0",
-    "chai":"3.5.0",
+    "chai": "3.5.0",
     "raml-1-parser": "1.1.19",
     "raml-js-validator": "0.5.1",
     "flat": "2.0.1",
@@ -46,10 +45,10 @@
   },
   "scripts": {
     "test": "nyc mocha --harmony-async-await test/bootstrap.test.js test/**/*.test.js",
-    "start":"node --harmony-async-await app.js",
-    "dummy":"node --harmony-async-await test/dummy/beanstalk-inject.js",
-    "dummyredis":"node --harmony-async-await test/dummy/redis-inject.js",
-    "docs":"apidoc -o docs"
+    "start": "node --harmony-async-await app.js",
+    "dummy": "node --harmony-async-await test/dummy/beanstalk-inject.js",
+    "dummyredis": "node --harmony-async-await test/dummy/redis-inject.js",
+    "docs": "apidoc -o docs"
   },
   "repository": {
     "type": "git",
