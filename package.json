@@ -44,10 +44,10 @@
     "nyc": "10.2.0"
   },
   "scripts": {
-    "test": "nyc mocha --harmony-async-await test/bootstrap.test.js test/**/*.test.js",
-    "start": "node --harmony-async-await app.js",
-    "dummy": "node --harmony-async-await test/dummy/beanstalk-inject.js",
-    "dummyredis": "node --harmony-async-await test/dummy/redis-inject.js",
+    "test": "nyc mocha test/bootstrap.test.js test/**/*.test.js",
+    "start": "node app.js",
+    "dummy": "node test/dummy/beanstalk-inject.js",
+    "dummyredis": "node test/dummy/redis-inject.js",
     "docs": "apidoc -o docs"
   },
   "repository": {
