@@ -1,0 +1,361 @@
+{
+	"info": {
+		"name": "Gossipmill",
+		"_postman_id": "80f93311-1c6e-7268-a1c4-58d2e9889645",
+		"description": "An API to subscribe and receive aggregated social media messages. Given a set of specific tokens and regex expressions, the service aggregates and filters messages from multiple datasources.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "messages",
+			"description": "Folder for messages",
+			"item": [
+				{
+					"name": "/messages/create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"credentials\":{\n    \"service\":\"twitter\",\n    \"key\":\"\",\n    \"secret\":\"\",\n    \"token\": \"\",\n    \"tokenSecret\": \"\"\n  },\n  \"text\":\"Test submission https://interpretation.connectedacademy.io/#/submission/interpretation/homework https://demo.fourcorners.io/\"\n}"
+						},
+						"url": {
+							"raw": "{{gossipmillserver}}/messages/create?psk={{psk}}",
+							"host": [
+								"{{gossipmillserver}}"
+							],
+							"path": [
+								"messages",
+								"create"
+							],
+							"query": [
+								{
+									"key": "psk",
+									"value": "{{psk}}",
+									"equals": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "/messages/subscribe/:service/:userid",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{gossipmillserver}}/messages/subscribe/:service/:userid?psk={{psk}}",
+							"host": [
+								"{{gossipmillserver}}"
+							],
+							"path": [
+								"messages",
+								"subscribe",
+								":service",
+								":userid"
+							],
+							"query": [
+								{
+									"key": "psk",
+									"value": "{{psk}}",
+									"equals": true
+								}
+							],
+							"variable": [
+								{
+									"key": "service",
+									"value": "twitter"
+								},
+								{
+									"key": "userid",
+									"value": "tombartindale"
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "/messages/list/:service/:user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"depth\":10,\n  \"lang\":\"en\",\n  \"whitelist\":true,\n  \"filter_by\":[\n    {\n      \"name\":\"course\",\n      \"query\":\"testclass\"\n    },\n    {\n      \"name\":\"class\",\n      \"query\":\"evidence\"\n    },\n    {\n      \"name\":\"content\",\n      \"query\":\"liveclass\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{gossipmillserver}}/messages/list/:service/:user?psk={{psk}}",
+							"host": [
+								"{{gossipmillserver}}"
+							],
+							"path": [
+								"messages",
+								"list",
+								":service",
+								":user"
+							],
+							"query": [
+								{
+									"key": "psk",
+									"value": "{{psk}}",
+									"equals": true
+								}
+							],
+							"variable": [
+								{
+									"key": "service",
+									"value": "twitter"
+								},
+								{
+									"key": "user",
+									"value": "tombartindale"
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "/messages/totals",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"group_by\":\n  {\n    \"name\":\"tag\"\n  },  \n  \"filter_by\":[\n    {\n      \"name\":\"course\",\n      \"query\":\"testclass.connectedacademy.io\"\n    },\n    {\n      \"name\":\"class\",\n      \"query\":\"evidence\"\n    },\n    {\n      \"name\":\"content\",\n      \"query\":\"liveclass\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{gossipmillserver}}/messages/totals?psk={{psk}}",
+							"host": [
+								"{{gossipmillserver}}"
+							],
+							"path": [
+								"messages",
+								"totals"
+							],
+							"query": [
+								{
+									"key": "psk",
+									"value": "{{psk}}",
+									"equals": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "/messages/visualisation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lang\":\"en\",\n  \"whitelist\":true,\n  \"group_by\": {\n    \"name\":\"segment\"\n  },\n  \"filter_by\":[\n    {\n      \"name\":\"course\",\n      \"query\":\"testclass.connectedacademy.io\"\n    },\n    {\n      \"name\":\"class\",\n      \"query\":\"evidence\"\n    },\n    {\n      \"name\":\"content\",\n      \"query\":\"liveclass\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{gossipmillserver}}/messages/visualisation?psk={{psk}}",
+							"host": [
+								"{{gossipmillserver}}"
+							],
+							"path": [
+								"messages",
+								"visualisation"
+							],
+							"query": [
+								{
+									"key": "psk",
+									"value": "{{psk}}",
+									"equals": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				},
+				{
+					"name": "/messages/summary/:service/:user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lang\":\"en\",\n  \"whitelist\":true,\n  \"filter_by\":[\n    {\n      \"name\":\"course\",\n      \"query\":\"testclass.connectedacademy.io\"\n    },\n    {\n      \"name\":\"class\",\n      \"query\":\"evidence\"\n    },\n    {\n      \"name\":\"content\",\n      \"query\":\"liveclass\"\n    },\n    {\n      \"name\":\"segment\",\n      \"query\":\"1\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{gossipmillserver}}/messages/summary/:service/:user?psk={{psk}}",
+							"host": [
+								"{{gossipmillserver}}"
+							],
+							"path": [
+								"messages",
+								"summary",
+								":service",
+								":user"
+							],
+							"query": [
+								{
+									"key": "psk",
+									"value": "{{psk}}",
+									"equals": true
+								}
+							],
+							"variable": [
+								{
+									"key": "service",
+									"value": "twitter"
+								},
+								{
+									"key": "user",
+									"value": "tombartindale"
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "services",
+			"description": "Folder for services",
+			"item": [
+				{
+					"name": "/services",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{gossipmillserver}}/services?psk={{psk}}",
+							"host": [
+								"{{gossipmillserver}}"
+							],
+							"path": [
+								"services"
+							],
+							"query": [
+								{
+									"key": "psk",
+									"value": "{{psk}}",
+									"equals": true
+								}
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "status",
+			"description": "Folder for status",
+			"item": [
+				{
+					"name": "/",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "{{gossipmillserver}}/",
+							"host": [
+								"{{gossipmillserver}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": ""
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
