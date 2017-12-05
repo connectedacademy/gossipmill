@@ -99,7 +99,7 @@ module.exports = {
 //        let query = "SELECT @rid.asString(), text, list(inE('reply')) as in_reply, entities, message_id,service, user.asString() as user, " + _.keys(tokens).join(',') + ", createdAt.asString(), lang, updatedAt.asString() \
         let query = "SELECT @rid.asString(), text, inE('reply') as in_reply, entities, message_id,service, user.asString() as user, " + _.keys(tokens).join(',') + ", createdAt.format(\"yyyy-MM-dd'T'HH:mm:ss.SSSZ\"), lang, updatedAt.asString() \
             FROM message \
-            WHERE processed=true";
+            WHERE processed=true AND moderationstate NOT IN [\"denied\"]";
 //            AND replyto is null";
 
         if (lang && lang != '*')
@@ -166,7 +166,7 @@ module.exports = {
 
         let query = "SELECT count(*), " + grouper + " \
             FROM message \
-            WHERE processed=true \
+            WHERE processed=true AND moderationstate NOT IN [\"denied\"] \
             AND "+grouper+" IS NOT null";
         if (lang && lang!='*')
             query += " AND lang=:lang";
@@ -219,7 +219,7 @@ module.exports = {
 
         let query = "SELECT COUNT(@rid) as total, " + params.group_by.name + " \
             FROM message \
-            WHERE processed=true AND " + params.group_by.name + " <> ''";
+            WHERE processed=true AND moderationstate NOT IN [\"denied\"] AND " + params.group_by.name + " <> ''";
 
         let tokens = _.groupBy(params.filter_by, 'name');
         tokens = _.mapValues(tokens, (t) => {
@@ -268,7 +268,7 @@ module.exports = {
             FROM message \
             LET $ismine = if(eval(\"user.account='"+params.account+"' AND user.service='"+params.service+"'\"),1,0)";
 
-        let where = "WHERE processed=true";
+        let where = "WHERE processed=true AND moderationstate NOT IN [\"denied\"]";
 
         if (lang && lang!='*')
             where += " AND lang=:lang";

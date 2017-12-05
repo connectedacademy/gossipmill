@@ -61,7 +61,8 @@ module.exports.http = {
           url: req.method + ' ' + req.path,
           query: req.query,
           params: req.params.all(),
-          time: res.get('X-Response-Time')
+          time: res.get('X-Response-Time'),
+          'gossipmill-version':package_info.version
         });
       });
       require('response-time')({suffix:false})(req, res, next);
