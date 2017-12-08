@@ -144,7 +144,7 @@ module.exports = {
 
         let userlist = _.uniq(recurseUser(data));
 
-        let users = await User.query('SELECT @rid.asString() as id, account, service, account_number, name, profile, link FROM user WHERE @rid IN ['+userlist.join(',')+']');
+        let users = await User.query('SELECT @rid.asString() as id, account, service, account_number, name, profile, link, last(history) as stats FROM user WHERE @rid IN ['+userlist.join(',')+']');
 
         applyUsers(data, users);
 
@@ -255,7 +255,8 @@ module.exports = {
         return newobj;
     },
 
-    //TODO: Bubble up the 'most interesting thing' in the segment query
+    //Bubble up the 'most interesting thing' in the segment query:
+    //Currently: selects most recent post which is yours, or most recent.
     heuristicSummary: async (params) => {
         let lang = params.lang;
 
@@ -322,14 +323,20 @@ module.exports = {
         // console.log(result);
 
         data = _.omit(_.first(result[0]), ['@version', '@type']);
+        data.author = _.omit(data.author, ['@version', '@type', '@class']);
+        data.author.stats = _.omit(_.last(data.author.history),['@type']);
+        delete data.author.history;
 
         return Message.removeCircularReferences({
             info: {
                 hashtags: _.map(result[1], (f) => _.omit(f, ['@version', '@type'])),
                 total: _.sum(_.pluck(result[2],'count')),
                 contributors: _.sample(_.map(result[2], (f) => {
+                    let author = _.omit(f.author, ['@version', '@type', '@class']);
+                    author.stats = _.omit(_.last(author.history),['@type']);
+                    delete author.history;
                     return {
-                        author: _.omit(f.author, ['@version', '@type', '@class']),
+                        author: author,
                         count: f.count
                     }
                 }),5)
