@@ -49,7 +49,7 @@ module.exports = {
 
     // process a live incoming message for all known subscribers
     processNewMessageForSubscribers: async (msg)=>{
-        sails.log.verbose('Subscription',{msg:'Publishing message to pending subscriptions', msg:msg});
+        sails.log.verbose('Subscription',{msg:'Publishing message to pending subscriptions', message:msg.id});
 
         let message = await Message.findOne({message_id:msg}).populate('user');
         Message.removeCircularReferences(message);
@@ -57,7 +57,8 @@ module.exports = {
         //Find all keys in redis that match the pattern:
         let queryStore = await Cache.getAllKeys('gm:subscriptions:*');
 
-        // console.log(queryStore);
+        console.log("*******************************************");
+        console.log(queryStore);
 
         for (let q of queryStore)
         {
@@ -66,14 +67,14 @@ module.exports = {
 
             if (Message.heuristicInMemory(query, message))
             {
-                message.user = _.omit(message.user,'rid','credentials','account_credentials','_raw');
+                message.author = _.omit(message.user,'rid','credentials','account_credentials','_raw');
                 // console.log(`Sending to query-${query.socketid}`);
                 sails.sockets.broadcast(`query-${query.socketid}`, `query-${query.socketid}`, _.omit(message,'rid','_raw','user_from'));
-                sails.log.verbose('Subscription',{msg:'Message sent to', message:message.message_id, subscribers: q});
+                sails.log.verbose('Subscription',`query-${query.socketid}`,{msg:'Message sent to', message:message.id, subscribers: q});
             }
             else
             {
-                sails.log.silly('Message not matching heuristic', message.message_id, query);
+                sails.log.verbose('Message not matching heuristic', message.message_id, query);
             }
         }
         return;
